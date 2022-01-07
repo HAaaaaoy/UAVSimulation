@@ -20,6 +20,8 @@ public class UAVNetwork {
     private CopyOnWriteArrayList<NRUAV> nRUAVs = new CopyOnWriteArrayList<>();
     //已经入网（感染）的无人机队列
     private CopyOnWriteArrayList<RUAV> rUAVs = new CopyOnWriteArrayList<>();
+    //保存网络所有无人机的map表
+    private HashMap<Integer, UAV> uavHashMap = new HashMap<>();
     //仿真时无人机的标注信息
     private CopyOnWriteArrayList<RText> rTexts = new CopyOnWriteArrayList<>();
     //记录无人机入网时间
@@ -44,21 +46,23 @@ public class UAVNetwork {
         //无人机宽度设为120
         int width = 120;
         for (int i = 0; i < rNumber; i++) {
-            logger.info("192.168.192." + serialID);
+            logger.info("第"+serialID+"号无人机初始化--IP地址："+"192.168.192." + serialID);
             RUAV rUAV = new RUAV(ThreadLocalRandom.current().nextInt(GUItil.getBounds().width),
                     ThreadLocalRandom.current().nextInt(GUItil.getBounds().height),
                     height, width, ImageRead.RUAVs, serialID, "192.168.192." + serialID);
             serialID++;
             rUAVs.add(rUAV);
+            uavHashMap.put(rUAV.getSerialID(), rUAV);
             rUAV.start();
         }
         for (int j = 0; j < nrNumber; j++) {
-            logger.info("192.168.192." + serialID);
+            logger.info("第"+serialID+"号无人机初始化--IP地址："+"192.168.192." + serialID);
             NRUAV nrUAV = new NRUAV(ThreadLocalRandom.current().nextInt(GUItil.getBounds().width),
                     ThreadLocalRandom.current().nextInt(GUItil.getBounds().height),
                     height, width, ImageRead.NRUAVs, serialID, "192.168.192." + serialID);
             serialID++;
             nRUAVs.add(nrUAV);
+            uavHashMap.put(nrUAV.getSerialID(), nrUAV);
         }
     }
 

@@ -3,12 +3,17 @@ package scene;
 import UAVs.NRUAV;
 import UAVs.RUAV;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Iterator;
 
 public class PlaneWars extends JPanel {
 
+    private int backgroundmove = 0;
     //仿真实现
     public UAVNetwork uavNetwork;
 
@@ -62,6 +67,5 @@ public class PlaneWars extends JPanel {
             ruavIterator.next().drawUAVs(g);
         }
     }
-
 
 }
