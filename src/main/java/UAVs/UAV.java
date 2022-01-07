@@ -10,6 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.log4j.Logger;
+import scene.PlaneWars;
 
 
 public class UAV extends Thread {
@@ -55,7 +56,7 @@ public class UAV extends Thread {
     }
 
     public void move() {
-        random_move = ThreadLocalRandom.current().nextInt(1,9);
+        random_move = ThreadLocalRandom.current().nextInt(1, 9);
         try {
             switch (random_move) {
                 case 1:
@@ -86,6 +87,37 @@ public class UAV extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 绘图
+     */
+    public void drawUAVs(Graphics g) {
+        g.drawImage(UAV_image, position_index_x, position_index_y, UAV_Height, UAV_Width, null);
+        //绘制线条
+//        if (PlaneWars.Linkinfom.get(serialID) != null) {
+//            for (int i = 0; i < PlaneWars.Linkinfom.get(serialID).size(); i++) {
+//                g.drawLine(position_index_x + UAV_Width / 2, position_index_y + UAV_Width / 2,
+//                        PlaneWars.getRuaVs().get(PlaneWars.Linkinfom.get(serialID).get(i)).getPosition_index_x() + UAV_Width / 2,
+//                        PlaneWars.getRuaVs().get(PlaneWars.Linkinfom.get(serialID).get(i)).getPosition_index_y() + UAV_Width / 2);
+//            }
+//        }
+
+        g.drawOval(position_index_x, position_index_y, 120, 120);
+    }
+
+    //是否能够通信
+    public Boolean isGetMessage(UAV uav) {
+        //假设无人机的通信距离是80m;
+        int UAV_MAX_recieved = 120;
+        //求两无人机的中心点
+        int u1x = this.position_index_x + this.UAV_Width / 2;
+        int u1y = this.position_index_y + this.UAV_Height / 2;
+        int u2x = uav.position_index_x + uav.UAV_Width / 2;
+        int u2y = uav.position_index_y + uav.UAV_Height / 2;
+        //横、纵、斜距离检测
+        return Math.sqrt(Math.abs(u1x - u2x) * Math.abs(u1x - u2x) + Math.abs(u1y - u2y) * Math.abs(u1y - u2y)) <= UAV_MAX_recieved;
+
     }
 
     /**
@@ -204,5 +236,13 @@ public class UAV extends Thread {
 
     public void setUAV_image(BufferedImage UAV_image) {
         this.UAV_image = UAV_image;
+    }
+
+    public int getSerialID() {
+        return serialID;
+    }
+
+    public NodeIP getIp() {
+        return ip;
     }
 }

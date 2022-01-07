@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class GUItil {
+
     public static Rectangle getBounds() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         //保证主界面不会覆盖电脑屏幕的任务栏
@@ -15,6 +16,7 @@ public class GUItil {
                 screenSize.height - screenInsets.top - screenInsets.bottom);
         return rectangle;
     }
+
     public static ArrayList<Integer> getCenter() {
             int x = getBounds().width/2;
             int y = getBounds().height/2;
