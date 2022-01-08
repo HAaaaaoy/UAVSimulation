@@ -14,6 +14,7 @@ import java.util.Iterator;
 public class PlaneWars extends JPanel {
 
     private int backgroundmove = 0;
+    public static Long currentTime;
     //仿真实现
     public UAVNetwork uavNetwork;
 
@@ -38,6 +39,7 @@ public class PlaneWars extends JPanel {
                         uavNetwork.infect();
                         try {
                             Thread.sleep(40);
+                            currentTime += 40;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

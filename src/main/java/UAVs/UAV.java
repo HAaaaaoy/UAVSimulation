@@ -1,6 +1,7 @@
 package UAVs;
 
 import GUItil.GUItil;
+import UAVs.network.LinkLayer;
 import UAVs.network.NodeIP;
 import UAVs.network.Packet;
 
@@ -11,6 +12,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.log4j.Logger;
 import scene.PlaneWars;
+import scene.WirelessChannel;
 
 
 public class UAV extends Thread {
@@ -30,6 +32,8 @@ public class UAV extends Thread {
     private int serialID;
     //无人机的IP
     private NodeIP ip;
+    //链路层
+    private LinkLayer linkLayer;
 
     private int moveStep = 7;
     private int random_move;
@@ -44,15 +48,18 @@ public class UAV extends Thread {
     private CopyOnWriteArrayList<Packet> receivedList = new CopyOnWriteArrayList<>();
 
     public static int totalUavNumber = 0;
+    public WirelessChannel wifi;
 
-    public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, String ip) {
+    public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, WirelessChannel wifi) {
         this.position_index_x = position_index_x;
         this.position_index_y = position_index_y;
         this.UAV_Height = UAV_Height;
         this.UAV_Width = UAV_Width;
         this.UAV_image = UAV_image;
         this.serialID = serialID;
-        this.ip = new NodeIP(ip);
+//        this.ip = new NodeIP(ip);
+        this.wifi = wifi;
+        this.linkLayer = new LinkLayer(wifi);
     }
 
     public void move() {
@@ -118,6 +125,15 @@ public class UAV extends Thread {
         //横、纵、斜距离检测
         return Math.sqrt(Math.abs(u1x - u2x) * Math.abs(u1x - u2x) + Math.abs(u1y - u2y) * Math.abs(u1y - u2y)) <= UAV_MAX_recieved;
 
+    }
+
+    public int calculateDistance(UAV uav){
+        //求两无人机的中心点
+        int u1x = this.position_index_x + this.UAV_Width / 2;
+        int u1y = this.position_index_y + this.UAV_Height / 2;
+        int u2x = uav.position_index_x + uav.UAV_Width / 2;
+        int u2y = uav.position_index_y + uav.UAV_Height / 2;
+        return (int) Math.sqrt(Math.abs(u1x - u2x) * Math.abs(u1x - u2x) + Math.abs(u1y - u2y) * Math.abs(u1y - u2y));
     }
 
     /**
