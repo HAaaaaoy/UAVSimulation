@@ -7,11 +7,15 @@ import UAVs.network.Packet;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.log4j.Logger;
+import route.Cluster;
 import scene.PlaneWars;
+import scene.UAVNetwork;
 import scene.WirelessChannel;
 
 
@@ -35,7 +39,7 @@ public class UAV extends Thread {
     //链路层
     private LinkLayer linkLayer;
 
-    private int moveStep = 7;
+    private int moveStep = 20;
     private int random_move;
     //无人机图标
     BufferedImage UAV_image;
@@ -47,10 +51,14 @@ public class UAV extends Thread {
     private CopyOnWriteArrayList<Packet> sentList = new CopyOnWriteArrayList<>();
     private CopyOnWriteArrayList<Packet> receivedList = new CopyOnWriteArrayList<>();
 
+
+    public Cluster cluster;
+
     public static int totalUavNumber = 0;
     public WirelessChannel wifi;
+    public UAVNetwork uavNetwork;
 
-    public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, WirelessChannel wifi) {
+    public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, UAVNetwork uavNetwork) {
         this.position_index_x = position_index_x;
         this.position_index_y = position_index_y;
         this.UAV_Height = UAV_Height;
@@ -58,8 +66,9 @@ public class UAV extends Thread {
         this.UAV_image = UAV_image;
         this.serialID = serialID;
 //        this.ip = new NodeIP(ip);
-        this.wifi = wifi;
-        this.linkLayer = new LinkLayer(wifi);
+        this.uavNetwork = uavNetwork;
+        this.wifi = this.uavNetwork.wifi;
+        this.linkLayer = new LinkLayer(this.wifi);
     }
 
     public void move() {
@@ -124,7 +133,6 @@ public class UAV extends Thread {
         int u2y = uav.position_index_y + uav.UAV_Height / 2;
         //横、纵、斜距离检测
         return Math.sqrt(Math.abs(u1x - u2x) * Math.abs(u1x - u2x) + Math.abs(u1y - u2y) * Math.abs(u1y - u2y)) <= UAV_MAX_recieved;
-
     }
 
     public int calculateDistance(UAV uav){
@@ -134,6 +142,22 @@ public class UAV extends Thread {
         int u2x = uav.position_index_x + uav.UAV_Width / 2;
         int u2y = uav.position_index_y + uav.UAV_Height / 2;
         return (int) Math.sqrt(Math.abs(u1x - u2x) * Math.abs(u1x - u2x) + Math.abs(u1y - u2y) * Math.abs(u1y - u2y));
+    }
+
+    //广播
+    public void findClusterMember(){
+        CopyOnWriteArrayList<RUAV> rUAVs = uavNetwork.getrUAVs();
+        rUAVs.remove(this);
+        Iterator<RUAV> iterator = rUAVs.iterator();
+        while (iterator.hasNext()){
+            RUAV uav = iterator.next();
+            if(this.calculateDistance(uav) <= cluster.clusterRadius && cluster.getMemberList().size() <= cluster.memberNumber ){
+                this.cluster.addClusterMember(uav);
+                uavNetwork.notClusterList.remove(uav);
+            }else if(this.calculateDistance(uav) <= cluster.clusterRadius && cluster.getMemberList().size() > cluster.memberNumber ) {
+                break;
+            }
+        }
     }
 
     /**
@@ -260,5 +284,17 @@ public class UAV extends Thread {
 
     public NodeIP getIp() {
         return ip;
+    }
+
+    public Cluster setCluster(){
+        this.cluster = new Cluster(this);
+        logger.info("At "+PlaneWars.currentTime+": 第"+ serialID + "号无人机成为簇头，簇编号--"+this.cluster.getClusterID());
+        uavNetwork.notClusterList.remove(this);
+        this.findClusterMember();
+        return this.cluster;
+    }
+
+    public Cluster getCluster(){
+        return this.cluster;
     }
 }

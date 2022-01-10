@@ -6,6 +6,7 @@ import UAVs.RUAV;
 import UAVs.UAV;
 import image.ImageRead;
 import org.apache.log4j.Logger;
+import route.Route;
 import text.RText;
 
 import java.util.HashMap;
@@ -21,10 +22,14 @@ public class UAVNetwork {
     //已经入网（感染）的无人机队列
     private CopyOnWriteArrayList<RUAV> rUAVs = new CopyOnWriteArrayList<>();
     //保存网络所有无人机的map表
-    private static HashMap<Integer, UAV> uavHashMap = new HashMap<>();
+    public static HashMap<Integer, UAV> uavHashMap = new HashMap<>();
+    public CopyOnWriteArrayList<RUAV> notClusterList = new CopyOnWriteArrayList<>();
     //仿真时无人机的标注信息
     private CopyOnWriteArrayList<RText> rTexts = new CopyOnWriteArrayList<>();
     //记录无人机入网时间
+
+
+    public Route route;
 
 
 
@@ -42,6 +47,7 @@ public class UAVNetwork {
         this.rNumber = rNumber;
         this.nrNumber = nrNumber;
         this.wifi = new WirelessChannel();
+        this.route = new Route();
     }
 
 
@@ -54,7 +60,8 @@ public class UAVNetwork {
             logger.info("第"+serialID+"号无人机初始化--IP地址："+"192.168.192." + serialID);
             RUAV rUAV = new RUAV(ThreadLocalRandom.current().nextInt(GUItil.getBounds().width),
                     ThreadLocalRandom.current().nextInt(GUItil.getBounds().height),
-                    height, width, ImageRead.RUAVs, serialID, wifi);
+                    height, width, ImageRead.RUAVs, serialID, this);
+            notClusterList.add(rUAV);
             serialID++;
             rUAVs.add(rUAV);
             uavHashMap.put(rUAV.getSerialID(), rUAV);
@@ -64,7 +71,7 @@ public class UAVNetwork {
             logger.info("第"+serialID+"号无人机初始化--IP地址："+"192.168.192." + serialID);
             NRUAV nrUAV = new NRUAV(ThreadLocalRandom.current().nextInt(GUItil.getBounds().width),
                     ThreadLocalRandom.current().nextInt(GUItil.getBounds().height),
-                    height, width, ImageRead.NRUAVs, serialID, wifi);
+                    height, width, ImageRead.NRUAVs, serialID, this);
             serialID++;
             nRUAVs.add(nrUAV);
             uavHashMap.put(nrUAV.getSerialID(), nrUAV);
@@ -86,8 +93,10 @@ public class UAVNetwork {
             for (int j = 0; j < nRUAVs.size(); j++) {
                 if(rUAVs.get(i).isGetMessage(nRUAVs.get(j))){
                     NRUAV temp =nRUAVs.get(j);
-                    rUAVs.add(new RUAV(temp.getPosition_index_x(), temp.getPosition_index_y(), temp.getUAV_Height(), temp.getUAV_Width(),
-                            ImageRead.RUAVs, temp.getSerialID(), wifi));
+                    RUAV ruav = new RUAV(temp.getPosition_index_x(), temp.getPosition_index_y(), temp.getUAV_Height(), temp.getUAV_Width(),
+                            ImageRead.RUAVs, temp.getSerialID(), this);
+                    rUAVs.add(ruav);
+                    notClusterList.add(ruav);
                     nRUAVs.remove(nRUAVs.get(j));
                 }
             }

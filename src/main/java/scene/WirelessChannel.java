@@ -35,11 +35,11 @@ public class WirelessChannel extends Thread {
                     //到达操作
                     transmissions.remove(t);
                 }
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            }
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
