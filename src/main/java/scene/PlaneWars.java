@@ -1,15 +1,11 @@
 package scene;
 
-import UAVs.NRUAV;
-import UAVs.RUAV;
+import UAVs.UAV;
 import org.apache.log4j.Logger;
+import text.UAVsText;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Iterator;
 
 public class PlaneWars extends JPanel {
@@ -22,7 +18,7 @@ public class PlaneWars extends JPanel {
     private Boolean runningFlag = true;
 
     public PlaneWars() {
-        uavNetwork = new UAVNetwork(1, 50);
+        uavNetwork = new UAVNetwork( 50);
     }
 
 
@@ -38,28 +34,18 @@ public class PlaneWars extends JPanel {
                 uavNetwork.initUAVs();
                 while (runningFlag) {
                     //入网过程
-                    if (uavNetwork.status.equals(SimulationStatus.RUNNING) && (uavNetwork.getnRUAVs().size() > 0)) {
+                    if (uavNetwork.status.equals(SimulationStatus.RUNNING)) {
                         uavNetwork.UAVsMoving();
-                        uavNetwork.infect();
+                        logger.info("开始路由");
+                        while (uavNetwork.notClusterList.size() > 0) {
+                            uavNetwork.route.selectedCluster(uavNetwork.notClusterList.get(0));
+                        }
                         try {
                             Thread.sleep(40);
                             currentTime += 40;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                    }else if(uavNetwork.status.equals(SimulationStatus.RUNNING) && (uavNetwork.getnRUAVs().size() == 0) ){
-                        logger.info("开始路由");
-                        while (uavNetwork.notClusterList.size() > 0){
-                            uavNetwork.route.selectedCluster(uavNetwork.notClusterList.get(0));
-                        }
-
-                        try {
-                            Thread.sleep(100);
-                            currentTime += 100;
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        setRunningFlag(false);
                     }
                     repaint();
                 }
@@ -74,20 +60,26 @@ public class PlaneWars extends JPanel {
     public void paint(Graphics g) {
         super.paint(g);
         paintUAVs(g);
+        drawText(g);
     }
 
     public void paintUAVs(Graphics g) {
-        Iterator<NRUAV> nruavIterator = uavNetwork.getnRUAVs().iterator();
-        Iterator<RUAV> ruavIterator = uavNetwork.getrUAVs().iterator();
-        while (nruavIterator.hasNext()){
-            nruavIterator.next().drawUAVs(g);
+        Iterator<UAV> uavIterator = uavNetwork.movingList.iterator();
+        while (uavIterator.hasNext()) {
+            uavIterator.next().drawUAVs(g);
         }
-        while (ruavIterator.hasNext()){
-            ruavIterator.next().drawUAVs(g);
-        }
+
     }
 
-    private void setRunningFlag(Boolean flag){
+    public void drawText(Graphics g){
+        Iterator<UAVsText> iterator = uavNetwork.getTexts().iterator();
+        while (iterator.hasNext()){
+            iterator.next().drawText(g);
+        }
+
+    }
+
+    private void setRunningFlag(Boolean flag) {
         this.runningFlag = flag;
     }
 

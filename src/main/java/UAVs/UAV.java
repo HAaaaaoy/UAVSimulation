@@ -17,6 +17,8 @@ import route.Cluster;
 import scene.PlaneWars;
 import scene.UAVNetwork;
 import scene.WirelessChannel;
+import text.TextStatus;
+import text.UAVsText;
 
 
 public class UAV extends Thread {
@@ -27,8 +29,8 @@ public class UAV extends Thread {
      */
     private final int circle_radius = 30;
     //坐标属性
-    private int position_index_x;
-    private int position_index_y;
+    public int position_index_x;
+    public int position_index_y;
     //UAV大小
     private int UAV_Width;
     private int UAV_Height;
@@ -39,13 +41,14 @@ public class UAV extends Thread {
     //链路层
     private LinkLayer linkLayer;
 
-    private int moveStep = 20;
+    private int moveStep = 7;
     private int random_move;
     //无人机图标
     BufferedImage UAV_image;
     //虚拟坐标
-    private Point virtualPosition = new Point();
+    private Point virtualPosition;
     private int ack[] = {1};
+
 
     //发送与接收packet的队列
     private CopyOnWriteArrayList<Packet> sentList = new CopyOnWriteArrayList<>();
@@ -53,10 +56,14 @@ public class UAV extends Thread {
 
 
     public Cluster cluster;
+    //所加入的cluster
+    public CopyOnWriteArrayList clusters = new CopyOnWriteArrayList();
 
     public static int totalUavNumber = 0;
     public WirelessChannel wifi;
     public UAVNetwork uavNetwork;
+    //无人机显示文本
+    private UAVsText uaVsText;
 
     public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, UAVNetwork uavNetwork) {
         this.position_index_x = position_index_x;
@@ -69,6 +76,7 @@ public class UAV extends Thread {
         this.uavNetwork = uavNetwork;
         this.wifi = this.uavNetwork.wifi;
         this.linkLayer = new LinkLayer(this.wifi);
+        this.uaVsText = new UAVsText(position_index_x, position_index_y, UAV_Height, serialID, this);
     }
 
     public void move() {
@@ -118,24 +126,12 @@ public class UAV extends Thread {
 //                        PlaneWars.getRuaVs().get(PlaneWars.Linkinfom.get(serialID).get(i)).getPosition_index_y() + UAV_Width / 2);
 //            }
 //        }
-
         g.drawOval(position_index_x, position_index_y, 120, 120);
     }
 
-    //是否能够通信
-    public Boolean isGetMessage(UAV uav) {
-        //假设无人机的通信距离是80m;
-        int UAV_MAX_recieved = 120;
-        //求两无人机的中心点
-        int u1x = this.position_index_x + this.UAV_Width / 2;
-        int u1y = this.position_index_y + this.UAV_Height / 2;
-        int u2x = uav.position_index_x + uav.UAV_Width / 2;
-        int u2y = uav.position_index_y + uav.UAV_Height / 2;
-        //横、纵、斜距离检测
-        return Math.sqrt(Math.abs(u1x - u2x) * Math.abs(u1x - u2x) + Math.abs(u1y - u2y) * Math.abs(u1y - u2y)) <= UAV_MAX_recieved;
-    }
 
-    public int calculateDistance(UAV uav){
+    //是否能够通信
+    public int calculateDistance(UAV uav) {
         //求两无人机的中心点
         int u1x = this.position_index_x + this.UAV_Width / 2;
         int u1y = this.position_index_y + this.UAV_Height / 2;
@@ -145,16 +141,17 @@ public class UAV extends Thread {
     }
 
     //广播
-    public void findClusterMember(){
-        CopyOnWriteArrayList<RUAV> rUAVs = uavNetwork.getrUAVs();
+    public void findClusterMember() {
+        CopyOnWriteArrayList<UAV> rUAVs = new CopyOnWriteArrayList<>();
+        rUAVs.addAll(uavNetwork.movingList);
         rUAVs.remove(this);
-        Iterator<RUAV> iterator = rUAVs.iterator();
-        while (iterator.hasNext()){
-            RUAV uav = iterator.next();
-            if(this.calculateDistance(uav) <= cluster.clusterRadius && cluster.getMemberList().size() <= cluster.memberNumber ){
+        Iterator<UAV> iterator = rUAVs.iterator();
+        while (iterator.hasNext()) {
+            UAV uav = iterator.next();
+            if (this.calculateDistance(uav) <= cluster.clusterRadius && cluster.getMemberList().size() <= cluster.memberNumber) {
                 this.cluster.addClusterMember(uav);
                 uavNetwork.notClusterList.remove(uav);
-            }else if(this.calculateDistance(uav) <= cluster.clusterRadius && cluster.getMemberList().size() > cluster.memberNumber ) {
+            } else if (this.calculateDistance(uav) <= cluster.clusterRadius && cluster.getMemberList().size() > cluster.memberNumber) {
                 break;
             }
         }
@@ -286,15 +283,34 @@ public class UAV extends Thread {
         return ip;
     }
 
-    public Cluster setCluster(){
+    public Cluster setCluster() {
         this.cluster = new Cluster(this);
-        logger.info("At "+PlaneWars.currentTime+": 第"+ serialID + "号无人机成为簇头，簇编号--"+this.cluster.getClusterID());
+        logger.info("At " + PlaneWars.currentTime + ": 第" + serialID + "号无人机成为簇头，簇编号--" + this.cluster.getClusterID());
         uavNetwork.notClusterList.remove(this);
+        uaVsText.setTextStatus(TextStatus.ClusterHeader);
+        uaVsText.setTime(PlaneWars.currentTime);
+        uaVsText.setReposition_x(this.position_index_x);
+        uaVsText.setReposition_y(this.position_index_y);
+        uavNetwork.getTexts().add(uaVsText);
         this.findClusterMember();
         return this.cluster;
     }
 
-    public Cluster getCluster(){
+    public void joinCluster(Cluster cluster) {
+        this.clusters.add(cluster);
+    }
+
+    public void updateText() {
+        uaVsText.setReposition_x(this.position_index_x);
+        uaVsText.setReposition_y(this.position_index_y);
+    }
+
+
+    public Cluster getCluster() {
         return this.cluster;
     }
+
+
+
+
 }

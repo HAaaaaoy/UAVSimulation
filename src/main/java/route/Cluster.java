@@ -37,6 +37,7 @@ public class Cluster {
 
     public void addClusterMember(UAV member){
         logger.info("At "+ PlaneWars.currentTime+": 第"+ member.getSerialID() + "号无人机加入"+this.getClusterID()+"簇");
+        member.joinCluster(this);
         this.memberList.add(member.getSerialID());
     }
 
