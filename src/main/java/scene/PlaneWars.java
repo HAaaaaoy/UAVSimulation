@@ -18,7 +18,7 @@ public class PlaneWars extends JPanel {
     private Boolean runningFlag = true;
 
     public PlaneWars() {
-        uavNetwork = new UAVNetwork( 50);
+        uavNetwork = new UAVNetwork(50);
     }
 
 
@@ -34,12 +34,22 @@ public class PlaneWars extends JPanel {
                 uavNetwork.initUAVs();
                 while (runningFlag) {
                     //入网过程
-                    if (uavNetwork.status.equals(SimulationStatus.RUNNING)) {
+                    if (uavNetwork.status.equals(SimulationStatus.FindCluster)) {
                         uavNetwork.UAVsMoving();
-                        logger.info("开始路由");
-                        while (uavNetwork.notClusterList.size() > 0) {
+                        if (uavNetwork.notClusterList.size() > 0 && currentTime % 2000 == 0) {
                             uavNetwork.route.selectedCluster(uavNetwork.notClusterList.get(0));
+                        } else if (uavNetwork.notClusterList.size() == 0) {
+                            //簇建立后路由
+                            uavNetwork.status = SimulationStatus.Route;
                         }
+                        try {
+                            Thread.sleep(40);
+                            currentTime += 40;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }else if(uavNetwork.status.equals(SimulationStatus.Route)){
+                        uavNetwork.UAVsMoving();
                         try {
                             Thread.sleep(40);
                             currentTime += 40;
@@ -71,9 +81,9 @@ public class PlaneWars extends JPanel {
 
     }
 
-    public void drawText(Graphics g){
+    public void drawText(Graphics g) {
         Iterator<UAVsText> iterator = uavNetwork.getTexts().iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             iterator.next().drawText(g);
         }
 

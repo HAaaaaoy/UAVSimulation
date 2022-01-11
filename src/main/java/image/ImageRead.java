@@ -9,11 +9,13 @@ public class ImageRead {
 
     public static BufferedImage NRUAVs;
     public static BufferedImage RUAVs;
+    public static BufferedImage GateWays;
     public static BufferedImage map;
     static {
         try {
             NRUAVs = ImageIO.read(new FileInputStream("./image/NRUAVs.png"));
             RUAVs = ImageIO.read(new FileInputStream("./image/RUAVs.png"));
+            GateWays = ImageIO.read(new FileInputStream("./image/GateWayUAV.png"));
             map = ImageIO.read(new FileInputStream("./image/map.jpeg"));
         } catch (IOException e) {
             e.printStackTrace();

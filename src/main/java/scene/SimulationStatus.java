@@ -1,5 +1,5 @@
 package scene;
 
 public enum SimulationStatus {
-    START, RUNNING, PAUSE, END
+    FindCluster, Route, Communicate
 }

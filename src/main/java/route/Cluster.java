@@ -18,13 +18,15 @@ public class Cluster {
     public final int memberNumber = 10;
     private int clusterID;
     //簇半径
-    public int clusterRadius;
+    public static int clusterRadius =  (int) (3*GUItil.getBounds().height/8);
+    //本簇的网关数量
+    private int gateWayNumber = 0;
 
     public Cluster(UAV clusterHead){
         this.clusterHead = clusterHead;
         this.clusterID = clusterNumber++;
         memberList = new CopyOnWriteArrayList<>();
-        clusterRadius = (int) (GUItil.getBounds().height/3);
+
     }
 
     public CopyOnWriteArrayList<Integer> getMemberList() {
@@ -37,7 +39,14 @@ public class Cluster {
 
     public void addClusterMember(UAV member){
         logger.info("At "+ PlaneWars.currentTime+": 第"+ member.getSerialID() + "号无人机加入"+this.getClusterID()+"簇");
+        member.clusterStatus = ClusterStatus.ClusterMember;
         member.joinCluster(this);
+        if(member.clusters.size() >=2 && gateWayNumber <=1){
+            member.setGateWay();
+            member.routeMaps = new CopyOnWriteArrayList<>();
+            //member.routeMaps.add(new RouteTableItem(this.clusterHead.getSerialID(), this.clusterHead.getSerialID()));
+            this.gateWayNumber ++ ;
+        }
         this.memberList.add(member.getSerialID());
     }
 

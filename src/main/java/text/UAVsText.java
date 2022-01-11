@@ -72,9 +72,8 @@ public class UAVsText extends Text {
     }
 
     public void updatePosition(){
-        logger.info("开始绘制" +id + "-" + uav.position_index_y + "-" + uav.position_index_y );
-        this.Reposition_x = uav.position_index_x;
-        this.Reposition_y = uav.position_index_y -10;
+        this.Reposition_x = uav.position_index_x  ;
+        this.Reposition_y = uav.position_index_y +100;
     }
 
     public void setid(int id) {

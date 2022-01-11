@@ -12,8 +12,11 @@ import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
+import image.ImageRead;
 import org.apache.log4j.Logger;
 import route.Cluster;
+import route.ClusterStatus;
+import route.RouteTableItem;
 import scene.PlaneWars;
 import scene.UAVNetwork;
 import scene.WirelessChannel;
@@ -58,12 +61,16 @@ public class UAV extends Thread {
     public Cluster cluster;
     //所加入的cluster
     public CopyOnWriteArrayList clusters = new CopyOnWriteArrayList();
+    public ClusterStatus clusterStatus;
 
     public static int totalUavNumber = 0;
     public WirelessChannel wifi;
     public UAVNetwork uavNetwork;
     //无人机显示文本
     private UAVsText uaVsText;
+
+    //网关或者簇头所用的路由表
+    public CopyOnWriteArrayList<RouteTableItem> routeMaps;
 
     public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, UAVNetwork uavNetwork) {
         this.position_index_x = position_index_x;
@@ -117,7 +124,7 @@ public class UAV extends Thread {
      * 绘图
      */
     public void drawUAVs(Graphics g) {
-        g.drawImage(UAV_image, position_index_x, position_index_y, UAV_Height, UAV_Width, null);
+        g.drawImage(UAV_image, position_index_x ,position_index_y, UAV_Height, UAV_Width, null);
         //绘制线条
 //        if (PlaneWars.Linkinfom.get(serialID) != null) {
 //            for (int i = 0; i < PlaneWars.Linkinfom.get(serialID).size(); i++) {
@@ -126,7 +133,12 @@ public class UAV extends Thread {
 //                        PlaneWars.getRuaVs().get(PlaneWars.Linkinfom.get(serialID).get(i)).getPosition_index_y() + UAV_Width / 2);
 //            }
 //        }
-        g.drawOval(position_index_x, position_index_y, 120, 120);
+        //g.drawOval(position_index_x, position_index_y, 120, 120);
+        if (this.cluster != null){
+            g.drawOval(position_index_x+60-GUItil.getBounds().height/3,position_index_y+60-GUItil.getBounds().height/3,2*Cluster.clusterRadius,2*Cluster.clusterRadius);
+        }
+
+
     }
 
 
@@ -156,6 +168,14 @@ public class UAV extends Thread {
             }
         }
     }
+
+    //成为网关
+    public void setGateWay(){
+        this.clusterStatus = ClusterStatus.GateWay;
+        setUAV_image(ImageRead.GateWays);
+    }
+
+
 
     /**
      * 无人机的随机移动方式
@@ -286,6 +306,9 @@ public class UAV extends Thread {
     public Cluster setCluster() {
         this.cluster = new Cluster(this);
         logger.info("At " + PlaneWars.currentTime + ": 第" + serialID + "号无人机成为簇头，簇编号--" + this.cluster.getClusterID());
+        this.clusterStatus = ClusterStatus.ClusterHead;
+        this.UAV_image = ImageRead.RUAVs;
+        this.routeMaps = new CopyOnWriteArrayList<>();
         uavNetwork.notClusterList.remove(this);
         uaVsText.setTextStatus(TextStatus.ClusterHeader);
         uaVsText.setTime(PlaneWars.currentTime);
@@ -299,12 +322,6 @@ public class UAV extends Thread {
     public void joinCluster(Cluster cluster) {
         this.clusters.add(cluster);
     }
-
-    public void updateText() {
-        uaVsText.setReposition_x(this.position_index_x);
-        uaVsText.setReposition_y(this.position_index_y);
-    }
-
 
     public Cluster getCluster() {
         return this.cluster;

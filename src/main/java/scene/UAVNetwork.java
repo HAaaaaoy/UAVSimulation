@@ -9,6 +9,7 @@ import text.UAVsText;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -29,10 +30,11 @@ public class UAVNetwork {
     //记录无人机感染的时间
     public HashMap<Integer, Long> timeRecord = new HashMap<>();
     //仿真状态
-    public SimulationStatus status = SimulationStatus.RUNNING;
+    public SimulationStatus status = SimulationStatus.FindCluster;
     private int serialID = 1;
 
     public WirelessChannel wifi;
+
 
     public UAVNetwork(int uavNumber){
         this.uavNumber = uavNumber;
@@ -56,7 +58,6 @@ public class UAVNetwork {
             serialID++;
             uavHashMap.put(uav.getSerialID(), uav);
         }
-
     }
 
     //无人机移动
@@ -66,6 +67,8 @@ public class UAVNetwork {
             iterator.next().move();
         }
     }
+
+
 
 
 
