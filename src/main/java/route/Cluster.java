@@ -5,6 +5,7 @@ import UAVs.UAV;
 import org.apache.log4j.Logger;
 import scene.PlaneWars;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Cluster {
@@ -39,11 +40,16 @@ public class Cluster {
 
     public void addClusterMember(UAV member){
         logger.info("At "+ PlaneWars.currentTime+": 第"+ member.getSerialID() + "号无人机加入"+this.getClusterID()+"簇");
+        clusterHead.communication.add(member);
+        RouteTableItem routeTableItem = new RouteTableItem(member.getSerialID(), member.getSerialID(), clusterHead.calculateDistance(member));
+        clusterHead.routes.add(routeTableItem);
         member.clusterStatus = ClusterStatus.ClusterMember;
         member.joinCluster(this);
         if(member.clusters.size() >=2 && gateWayNumber <=1){
             member.setGateWay();
-            member.routeMaps = new CopyOnWriteArrayList<>();
+            member.routes = new CopyOnWriteArrayList<>();
+            member.routeMaps = new ConcurrentHashMap<>();
+            member.communication = new CopyOnWriteArrayList<>();
             //member.routeMaps.add(new RouteTableItem(this.clusterHead.getSerialID(), this.clusterHead.getSerialID()));
             this.gateWayNumber ++ ;
         }

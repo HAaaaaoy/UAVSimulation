@@ -9,6 +9,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -70,7 +73,10 @@ public class UAV extends Thread {
     private UAVsText uaVsText;
 
     //网关或者簇头所用的路由表
-    public CopyOnWriteArrayList<RouteTableItem> routeMaps;
+    public CopyOnWriteArrayList<RouteTableItem> routes;
+    public Map<UAV, CopyOnWriteArrayList<RouteTableItem>> routeMaps;
+    //与本UAV相连的其他簇头或网关
+    public CopyOnWriteArrayList<UAV> communication = new CopyOnWriteArrayList<>();
 
     public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, UAVNetwork uavNetwork) {
         this.position_index_x = position_index_x;
@@ -308,7 +314,9 @@ public class UAV extends Thread {
         logger.info("At " + PlaneWars.currentTime + ": 第" + serialID + "号无人机成为簇头，簇编号--" + this.cluster.getClusterID());
         this.clusterStatus = ClusterStatus.ClusterHead;
         this.UAV_image = ImageRead.RUAVs;
-        this.routeMaps = new CopyOnWriteArrayList<>();
+        this.routes = new CopyOnWriteArrayList<>();
+        this.routeMaps = new ConcurrentHashMap<>();
+        this.communication = new CopyOnWriteArrayList<>();
         uavNetwork.notClusterList.remove(this);
         uaVsText.setTextStatus(TextStatus.ClusterHeader);
         uaVsText.setTime(PlaneWars.currentTime);
@@ -326,6 +334,117 @@ public class UAV extends Thread {
     public Cluster getCluster() {
         return this.cluster;
     }
+
+    /**
+     * 路由相关
+     * */
+
+    /**
+     * 添加从网络获取的由邻接路由器发送的RIP报文集合
+     *
+     * @param nRIPCache
+     */
+    public synchronized void putRIPCache(Map<UAV, CopyOnWriteArrayList<RouteTableItem>> nRIPCache) {
+        //此处不可直接对nRIPCache使用进行RIPCache.putAll拷贝，此时拷贝的是由各个路由器发送路由表的实体项
+        //D_V算法中的表项修改操作会直接修改原路由器路由表项对象导致莫名其妙的错误
+        for (Map.Entry<UAV, CopyOnWriteArrayList<RouteTableItem>> entry : nRIPCache.entrySet()) {
+            //Key--路由器名
+            //Value--对应路由表
+            CopyOnWriteArrayList<RouteTableItem> sentRoutingList = entry.getValue();
+            //复制路由表
+            CopyOnWriteArrayList<RouteTableItem> copyRoutingList = new CopyOnWriteArrayList<RouteTableItem>();
+            for (RouteTableItem sitem : sentRoutingList) {
+                copyRoutingList.add(new RouteTableItem(sitem));
+            }
+            routeMaps.put(entry.getKey(), copyRoutingList);
+        }
+    }
+
+    /**
+     * 发送获取RIP报文至邻接网络的RIPCache
+     * 注：此方法调用网络类的putRIPCache方法，将本路由器路由表封装成RIP报文发送至本路由器邻接的路由器
+     */
+    public void sentSelfRIP() {
+        //遍历直连网络列表
+        for (UAV uav : communication) {
+            //发送本路由器routingList至临接的路由器
+            //此处应该发送复制后的routerTable
+            //复制路由表
+            CopyOnWriteArrayList<RouteTableItem> copyRouterTable = new CopyOnWriteArrayList<RouteTableItem>();
+            for (RouteTableItem item : routes) {
+                copyRouterTable.add(new RouteTableItem(item));
+            }
+            Map<UAV, CopyOnWriteArrayList<RouteTableItem>> map = new ConcurrentHashMap<>();
+            map.put(this, copyRouterTable);
+            uav.putRIPCache(map);
+        }
+    }
+
+    /**
+     * RIP距离向量算法
+     * 注：需将RIPCache中所有RIP报文进行算法处理，D_V算法需独占RIPCache,routingList
+     */
+    public synchronized void D_V() {
+        //遍历未处理RIP报文集合
+        for (Map.Entry<UAV, CopyOnWriteArrayList<RouteTableItem>> entry : routeMaps.entrySet()) {
+            //Key--路由器
+            UAV sentUav = entry.getKey();
+            //Value--对应路由器的路由表
+            CopyOnWriteArrayList<RouteTableItem> sentRouteTable = entry.getValue();
+            for (RouteTableItem sitem : sentRouteTable) {
+                //路由表处理
+                //置下一跳路由器为发送路由其
+                sitem.setNext(sentUav.getSerialID());
+                //跳数加1
+                sitem.increaseHopNum(this.calculateDistance(sentUav));
+                //存储目的网络相同的routingListItem'Index
+                int index = -1;
+                for (int i = 0; i < routes.size(); i++) {
+                    RouteTableItem titem = routes.get(i);
+                    //判断routingList是否存在与该项目的网络相同的项，有则置index为i并跳出循环
+                    if (titem.equalsDst(sitem)) {
+                        index = i;
+                        break;
+                    }
+                }
+                //routingList存在与该项目的网络相同的项
+                if (index != -1) {
+                    RouteTableItem titem = routes.get(index);
+                    //判断是否有相同下一跳路由器
+                    if (titem.equalsNextRoute(sitem)) {
+                        //有相同下一跳路由器
+                        //替换原有Item
+                        if (communication.contains( UAVNetwork.uavHashMap.get(titem.getNext()))) {
+
+                            //直连路由器不更新
+                        } else {
+                            routes.remove(index);
+                            routes.add(sitem);
+                        }
+                    } else {
+                        //比较跳数
+                        if (sitem.getHopNum() < titem.getHopNum()) {
+                            //跳数小于原有项
+                            //替换原有Item
+                            routes.remove(index);
+                            routes.add(sitem);
+                        }
+                    }
+                }
+                //不存在--添加该项目
+                else {
+                    routes.add(sitem);
+                }
+            }
+        }
+        //处理完成后清空RIPCache
+        routeMaps.clear();
+        //printRouterTable();
+    }
+
+
+
+
 
 
 
