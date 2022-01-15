@@ -34,6 +34,7 @@ public class UAVNetwork {
     private int serialID = 1;
 
     public WirelessChannel wifi;
+    private int RIPNumber = 0;
 
 
     public UAVNetwork(int uavNumber){
@@ -49,10 +50,13 @@ public class UAVNetwork {
         //无人机宽度设为120
         int width = 120;
         for (int i = 0; i < uavNumber; i++) {
+            //在开始划分的时候随机平均
+            int m = i % 6;
             logger.info("第"+serialID+"号无人机初始化--IP地址："+"192.168.192." + serialID);
-            UAV uav = new UAV(ThreadLocalRandom.current().nextInt(GUItil.getBounds().width),
+            UAV uav = new UAV(ThreadLocalRandom.current().nextInt(m*GUItil.getBounds().width/7,(m+1)*GUItil.getBounds().width/7),
                     ThreadLocalRandom.current().nextInt(GUItil.getBounds().height),
                     height, width, ImageRead.NRUAVs, serialID, this);
+
             notClusterList.add(uav);
             movingList.add(uav);
             serialID++;
@@ -68,6 +72,21 @@ public class UAVNetwork {
         }
     }
 
+    //生成网络的路由
+    public void RIP(){
+        while (RIPNumber < 2000) {
+            for (UAV uav : Route.routes) {
+                try{
+                    uav.sentSelfRIP();
+                }finally {
+                    uav.D_V();
+                    RIPNumber++;
+                }
+            }
+        }
+        logger.info("网关和簇头"+Route.routes.size());
+
+    }
 
 
 

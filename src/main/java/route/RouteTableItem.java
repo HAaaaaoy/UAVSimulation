@@ -4,12 +4,12 @@ public class RouteTableItem {
 
     private int dst;
     private int next;
-    private int hopNum;
+    private int hopNum = 1;
 
     public RouteTableItem(int dst, int next, int hopNum) {
         this.dst = dst;
         this.next = next;
-        this.hopNum = hopNum;
+        this.hopNum = 1;
     }
 
 
@@ -25,6 +25,13 @@ public class RouteTableItem {
     //跳数自增
     public void increaseHopNum(int distance) {
         hopNum = hopNum + distance;
+        //hopNum++;
+    }
+
+    //跳数自增
+    public void increaseHopNum() {
+        // hopNum = hopNum + distance;
+        hopNum++;
     }
 
 

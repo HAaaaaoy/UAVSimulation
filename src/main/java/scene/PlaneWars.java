@@ -2,6 +2,7 @@ package scene;
 
 import UAVs.UAV;
 import org.apache.log4j.Logger;
+import route.Route;
 import text.UAVsText;
 
 import javax.swing.*;
@@ -48,14 +49,13 @@ public class PlaneWars extends JPanel {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                    }else if(uavNetwork.status.equals(SimulationStatus.Route)){
+                    } else if (uavNetwork.status.equals(SimulationStatus.Route)) {
                         uavNetwork.UAVsMoving();
-                        try {
-                            Thread.sleep(40);
-                            currentTime += 40;
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                        uavNetwork.RIP();
+                        for (UAV uav : Route.routes) {
+                            uav.printRouterTable();
                         }
+                        runningFlag = false;
                     }
                     repaint();
                 }

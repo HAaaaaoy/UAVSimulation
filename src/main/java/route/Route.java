@@ -11,8 +11,7 @@ public class Route {
     //保存网络中所有的簇
     private CopyOnWriteArrayList<Cluster> clusters;
 
-
-//    private static Route mInstance;
+    public static CopyOnWriteArrayList<UAV> routes  = new CopyOnWriteArrayList<>();
 
     public Route(){
         clusters = new CopyOnWriteArrayList<>();
@@ -30,7 +29,7 @@ public class Route {
         return clusters;
     }
 
-    public void selectedCluster( UAV uav){
+    public void selectedCluster(UAV uav){
         this.clusters.add(uav.setCluster());
     }
 

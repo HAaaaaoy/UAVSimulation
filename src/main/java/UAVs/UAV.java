@@ -9,7 +9,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -19,6 +18,7 @@ import image.ImageRead;
 import org.apache.log4j.Logger;
 import route.Cluster;
 import route.ClusterStatus;
+import route.Route;
 import route.RouteTableItem;
 import scene.PlaneWars;
 import scene.UAVNetwork;
@@ -63,7 +63,7 @@ public class UAV extends Thread {
 
     public Cluster cluster;
     //所加入的cluster
-    public CopyOnWriteArrayList clusters = new CopyOnWriteArrayList();
+    public CopyOnWriteArrayList<Cluster> clusters = new CopyOnWriteArrayList();
     public ClusterStatus clusterStatus;
 
     public static int totalUavNumber = 0;
@@ -73,10 +73,12 @@ public class UAV extends Thread {
     private UAVsText uaVsText;
 
     //网关或者簇头所用的路由表
-    public CopyOnWriteArrayList<RouteTableItem> routes;
-    public Map<UAV, CopyOnWriteArrayList<RouteTableItem>> routeMaps;
+    public CopyOnWriteArrayList<RouteTableItem> routeTable;
+    public Map<UAV, CopyOnWriteArrayList<RouteTableItem>> routeCache = new HashMap<>();
     //与本UAV相连的其他簇头或网关
     public CopyOnWriteArrayList<UAV> communication = new CopyOnWriteArrayList<>();
+
+    private int countNumber = 0;
 
     public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, UAVNetwork uavNetwork) {
         this.position_index_x = position_index_x;
@@ -141,7 +143,7 @@ public class UAV extends Thread {
 //        }
         //g.drawOval(position_index_x, position_index_y, 120, 120);
         if (this.cluster != null){
-            g.drawOval(position_index_x+60-GUItil.getBounds().height/3,position_index_y+60-GUItil.getBounds().height/3,2*Cluster.clusterRadius,2*Cluster.clusterRadius);
+            g.drawOval(position_index_x+60-GUItil.getBounds().height/2,position_index_y+60-GUItil.getBounds().height/2,2*Cluster.clusterRadius,2*Cluster.clusterRadius);
         }
 
 
@@ -166,10 +168,12 @@ public class UAV extends Thread {
         Iterator<UAV> iterator = rUAVs.iterator();
         while (iterator.hasNext()) {
             UAV uav = iterator.next();
-            if (this.calculateDistance(uav) <= cluster.clusterRadius && cluster.getMemberList().size() <= cluster.memberNumber) {
-                this.cluster.addClusterMember(uav);
-                uavNetwork.notClusterList.remove(uav);
-            } else if (this.calculateDistance(uav) <= cluster.clusterRadius && cluster.getMemberList().size() > cluster.memberNumber) {
+            //修正误差
+            if (this.calculateDistance(uav) <= cluster.clusterRadius+100 && cluster.getMemberList().size() < cluster.memberNumber) {
+                if(this.cluster.addClusterMember(uav)){
+                    uavNetwork.notClusterList.remove(uav);
+                }
+            } else if (this.calculateDistance(uav) <= cluster.clusterRadius+100 && cluster.getMemberList().size() >= cluster.memberNumber) {
                 break;
             }
         }
@@ -314,9 +318,10 @@ public class UAV extends Thread {
         logger.info("At " + PlaneWars.currentTime + ": 第" + serialID + "号无人机成为簇头，簇编号--" + this.cluster.getClusterID());
         this.clusterStatus = ClusterStatus.ClusterHead;
         this.UAV_image = ImageRead.RUAVs;
-        this.routes = new CopyOnWriteArrayList<>();
-        this.routeMaps = new ConcurrentHashMap<>();
+        this.routeTable = new CopyOnWriteArrayList<>();
+        this.routeCache = new ConcurrentHashMap<>();
         this.communication = new CopyOnWriteArrayList<>();
+        Route.routes.add(this);
         uavNetwork.notClusterList.remove(this);
         uaVsText.setTextStatus(TextStatus.ClusterHeader);
         uaVsText.setTime(PlaneWars.currentTime);
@@ -356,8 +361,9 @@ public class UAV extends Thread {
             for (RouteTableItem sitem : sentRoutingList) {
                 copyRoutingList.add(new RouteTableItem(sitem));
             }
-            routeMaps.put(entry.getKey(), copyRoutingList);
+            routeCache.put(entry.getKey(), copyRoutingList);
         }
+
     }
 
     /**
@@ -371,7 +377,7 @@ public class UAV extends Thread {
             //此处应该发送复制后的routerTable
             //复制路由表
             CopyOnWriteArrayList<RouteTableItem> copyRouterTable = new CopyOnWriteArrayList<RouteTableItem>();
-            for (RouteTableItem item : routes) {
+            for (RouteTableItem item : routeTable) {
                 copyRouterTable.add(new RouteTableItem(item));
             }
             Map<UAV, CopyOnWriteArrayList<RouteTableItem>> map = new ConcurrentHashMap<>();
@@ -386,7 +392,7 @@ public class UAV extends Thread {
      */
     public synchronized void D_V() {
         //遍历未处理RIP报文集合
-        for (Map.Entry<UAV, CopyOnWriteArrayList<RouteTableItem>> entry : routeMaps.entrySet()) {
+        for (Map.Entry<UAV, CopyOnWriteArrayList<RouteTableItem>> entry : routeCache.entrySet()) {
             //Key--路由器
             UAV sentUav = entry.getKey();
             //Value--对应路由器的路由表
@@ -397,10 +403,11 @@ public class UAV extends Thread {
                 sitem.setNext(sentUav.getSerialID());
                 //跳数加1
                 sitem.increaseHopNum(this.calculateDistance(sentUav));
+                //sitem.increaseHopNum();
                 //存储目的网络相同的routingListItem'Index
                 int index = -1;
-                for (int i = 0; i < routes.size(); i++) {
-                    RouteTableItem titem = routes.get(i);
+                for (int i = 0; i < routeTable.size(); i++) {
+                    RouteTableItem titem = routeTable.get(i);
                     //判断routingList是否存在与该项目的网络相同的项，有则置index为i并跳出循环
                     if (titem.equalsDst(sitem)) {
                         index = i;
@@ -409,7 +416,7 @@ public class UAV extends Thread {
                 }
                 //routingList存在与该项目的网络相同的项
                 if (index != -1) {
-                    RouteTableItem titem = routes.get(index);
+                    RouteTableItem titem = routeTable.get(index);
                     //判断是否有相同下一跳路由器
                     if (titem.equalsNextRoute(sitem)) {
                         //有相同下一跳路由器
@@ -418,28 +425,36 @@ public class UAV extends Thread {
 
                             //直连路由器不更新
                         } else {
-                            routes.remove(index);
-                            routes.add(sitem);
+                            routeTable.remove(index);
+                            routeTable.add(sitem);
                         }
                     } else {
                         //比较跳数
                         if (sitem.getHopNum() < titem.getHopNum()) {
                             //跳数小于原有项
                             //替换原有Item
-                            routes.remove(index);
-                            routes.add(sitem);
+                            routeTable.remove(index);
+                            routeTable.add(sitem);
                         }
                     }
                 }
                 //不存在--添加该项目
                 else {
-                    routes.add(sitem);
+                    routeTable.add(sitem);
                 }
             }
         }
         //处理完成后清空RIPCache
-        routeMaps.clear();
-        //printRouterTable();
+        countNumber++;
+        routeCache.clear();
+    }
+
+    public void printRouterTable() {
+        logger.info("开始打印第" + this.serialID + "号无人机的路由表，长度： " +  routeTable.size());
+        logger.info(countNumber);
+        for (RouteTableItem item : routeTable) {
+            logger.info(item.getDst() + "---" + item.getNext() + "---" + item.getHopNum());
+        }
     }
 
 
