@@ -15,25 +15,27 @@ public class WirelessChannel extends Thread {
     //
     public CopyOnWriteArrayList<Transmission> transmissions;
 
-    public WirelessChannel(){
+    public WirelessChannel() {
         transmissions = new CopyOnWriteArrayList<>();
     }
 
-    public synchronized void addTransmission(Transmission transmission){
+    public synchronized void addTransmission(Transmission transmission) {
         this.transmissions.add(transmission);
         logger.info("WLAN通信环境已创建");
         this.start();
     }
 
-    public void run(){
+    public void run() {
         Transmission t;
-        while (true){
+        while (true) {
             Iterator<Transmission> iterator = transmissions.iterator();
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 t = iterator.next();
-                if(isAchieved(t)){
+                if (isAchieved(t)) {
                     //到达操作
                     transmissions.remove(t);
+                    UAVNetwork.getUavHashMap().get(t.getDst()).linkLayer.addReceiveQueue(t.getPacket());
+                    t.getPacket().setReceiveTime(Math.toIntExact(PlaneWars.currentTime));
                 }
             }
             try {
@@ -44,17 +46,17 @@ public class WirelessChannel extends Thread {
         }
     }
 
-    public Boolean isAchieved(Transmission transmission){
+    public Boolean isAchieved(Transmission transmission) {
         UAV src = UAVNetwork.getUavHashMap().get(transmission.getSrc());
         UAV dst = UAVNetwork.getUavHashMap().get(transmission.getDst());
-        if((PlaneWars.currentTime-transmission.getCreatTime())>= delay(src.calculateDistance(dst)) ){
+        if ((PlaneWars.currentTime - transmission.getCreatTime()) >= delay(src.calculateDistance(dst))) {
             return true;
         }
         return false;
     }
 
-    private int delay(int distance){
-        return (int) Math.floor(0.1*distance);
+    private int delay(int distance) {
+        return (int) Math.floor(0.1 * distance);
     }
 
 

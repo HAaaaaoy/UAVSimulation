@@ -33,13 +33,13 @@ public class UAVNetwork {
     public SimulationStatus status = SimulationStatus.FindCluster;
     private int serialID = 1;
 
-    public WirelessChannel wifi;
+    public WirelessChannel wifi = new WirelessChannel();
     private int RIPNumber = 0;
+    public static CopyOnWriteArrayList<UAV> communicationList = new CopyOnWriteArrayList<>();
 
 
     public UAVNetwork(int uavNumber){
         this.uavNumber = uavNumber;
-        this.wifi = new WirelessChannel();
         this.route = new Route();
     }
 

@@ -45,7 +45,7 @@ public class UAV extends Thread {
     //无人机的IP
     private NodeIP ip;
     //链路层
-    private LinkLayer linkLayer;
+    public LinkLayer linkLayer;
 
     private int moveStep = 7;
     private int random_move;
@@ -54,12 +54,6 @@ public class UAV extends Thread {
     //虚拟坐标
     private Point virtualPosition;
     private int ack[] = {1};
-
-
-    //发送与接收packet的队列
-    private CopyOnWriteArrayList<Packet> sentList = new CopyOnWriteArrayList<>();
-    private CopyOnWriteArrayList<Packet> receivedList = new CopyOnWriteArrayList<>();
-
 
     public Cluster cluster;
     //所加入的cluster
@@ -132,7 +126,7 @@ public class UAV extends Thread {
      * 绘图
      */
     public void drawUAVs(Graphics g) {
-        g.drawImage(UAV_image, position_index_x ,position_index_y, UAV_Height, UAV_Width, null);
+        g.drawImage(UAV_image, position_index_x, position_index_y, UAV_Height, UAV_Width, null);
         //绘制线条
 //        if (PlaneWars.Linkinfom.get(serialID) != null) {
 //            for (int i = 0; i < PlaneWars.Linkinfom.get(serialID).size(); i++) {
@@ -142,8 +136,8 @@ public class UAV extends Thread {
 //            }
 //        }
         //g.drawOval(position_index_x, position_index_y, 120, 120);
-        if (this.cluster != null){
-            g.drawOval(position_index_x+60-GUItil.getBounds().height/2,position_index_y+60-GUItil.getBounds().height/2,2*Cluster.clusterRadius,2*Cluster.clusterRadius);
+        if (this.cluster != null) {
+            g.drawOval(position_index_x + 60 - GUItil.getBounds().height / 2, position_index_y + 60 - GUItil.getBounds().height / 2, 2 * Cluster.clusterRadius, 2 * Cluster.clusterRadius);
         }
 
 
@@ -169,22 +163,26 @@ public class UAV extends Thread {
         while (iterator.hasNext()) {
             UAV uav = iterator.next();
             //修正误差
-            if (this.calculateDistance(uav) <= cluster.clusterRadius+100 && cluster.getMemberList().size() < cluster.memberNumber) {
-                if(this.cluster.addClusterMember(uav)){
+            if (this.calculateDistance(uav) <= cluster.clusterRadius + 100 && cluster.getMemberList().size() < cluster.memberNumber) {
+                if (this.cluster.addClusterMember(uav)) {
                     uavNetwork.notClusterList.remove(uav);
                 }
-            } else if (this.calculateDistance(uav) <= cluster.clusterRadius+100 && cluster.getMemberList().size() >= cluster.memberNumber) {
+            } else if (this.calculateDistance(uav) <= cluster.clusterRadius + 100 && cluster.getMemberList().size() >= cluster.memberNumber) {
                 break;
             }
         }
     }
 
     //成为网关
-    public void setGateWay(){
+    public void setGateWay() {
         this.clusterStatus = ClusterStatus.GateWay;
+        uaVsText.setTextStatus(TextStatus.GateWay);
+        uaVsText.setTime(PlaneWars.currentTime);
+        uaVsText.setReposition_x(this.position_index_x);
+        uaVsText.setReposition_y(this.position_index_y);
+        uavNetwork.getTexts().add(uaVsText);
         setUAV_image(ImageRead.GateWays);
     }
-
 
 
     /**
@@ -421,7 +419,7 @@ public class UAV extends Thread {
                     if (titem.equalsNextRoute(sitem)) {
                         //有相同下一跳路由器
                         //替换原有Item
-                        if (communication.contains( UAVNetwork.uavHashMap.get(titem.getNext()))) {
+                        if (communication.contains(UAVNetwork.uavHashMap.get(titem.getNext()))) {
 
                             //直连路由器不更新
                         } else {
@@ -450,18 +448,50 @@ public class UAV extends Thread {
     }
 
     public void printRouterTable() {
-        logger.info("开始打印第" + this.serialID + "号无人机的路由表，长度： " +  routeTable.size());
+        logger.info("开始打印第" + this.serialID + "号无人机的路由表，长度： " + routeTable.size());
         logger.info(countNumber);
         for (RouteTableItem item : routeTable) {
             logger.info(item.getDst() + "---" + item.getNext() + "---" + item.getHopNum());
         }
     }
 
+    public void RouteAndForward() {
+        if(!this.linkLayer.receiveQueue.isEmpty()){
+            Packet packet = linkLayer.receiveQueue.remove();
+            if(packet.getDst() == this.serialID){
+                logger.info("收到");
+            }else {
+                Boolean isRouted = true;
+                Iterator<UAV> uavIterator = communication.iterator();
+                while (uavIterator.hasNext()){
+                    UAV uav = uavIterator.next();
+                    if(uav.serialID == packet.getDst()){
+                        packet.setNext(uav.serialID);
+                        this.linkLayer.send(packet);
+                        isRouted = false;
+                        break;
+                    }
+                }
 
+                if(isRouted){
+                    int nextRouter = 0;
+                    //true说明需要路由转发,遍历本路由器的路由表routerTable
+                    for (RouteTableItem routeTableItem : routeTable) {
+                        if (packet.getDst() == routeTableItem.getDst()) {
+                            //目的网段相同
+                            nextRouter = routeTableItem.getNext();
+                            break;
+                        }
+                    }
+                    if(nextRouter != 0){
+                        packet.setNext(nextRouter);
+                        this.linkLayer.send(packet);
+                    }
 
-
-
-
+                }
+            }
+        }
+    }
 
 
 }
