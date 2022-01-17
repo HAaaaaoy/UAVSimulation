@@ -88,6 +88,24 @@ public class UAV extends Thread {
         this.uaVsText = new UAVsText(position_index_x, position_index_y, UAV_Height, serialID, this);
     }
 
+    public void run() {
+        while (true) {
+            RouteAndForward();
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (PlaneWars.currentTime % 1000 == 0) {
+                if (!this.linkLayer.sentQueue.isEmpty()) {
+                    Packet packet = linkLayer.sentQueue.remove();
+                    this.linkLayer.send(packet, packet.getNext());
+                    logger.info("At " + PlaneWars.currentTime + ": 发送报文- " + packet.packetID );
+                }
+            }
+        }
+    }
+
     public void move() {
         random_move = ThreadLocalRandom.current().nextInt(1, 9);
         try {
@@ -449,48 +467,62 @@ public class UAV extends Thread {
 
     public void printRouterTable() {
         logger.info("开始打印第" + this.serialID + "号无人机的路由表，长度： " + routeTable.size());
-        logger.info(countNumber);
         for (RouteTableItem item : routeTable) {
             logger.info(item.getDst() + "---" + item.getNext() + "---" + item.getHopNum());
         }
     }
 
     public void RouteAndForward() {
-        if(!this.linkLayer.receiveQueue.isEmpty()){
+        if (!this.linkLayer.receiveQueue.isEmpty()) {
             Packet packet = linkLayer.receiveQueue.remove();
-            if(packet.getDst() == this.serialID){
-                logger.info("收到");
-            }else {
+            if (packet.getDst() == this.serialID) {
+                logger.info(this.serialID + "收到来自" + packet.getSrc() + "的报文，ID为" + packet.packetID);
+            } else {
                 Boolean isRouted = true;
                 Iterator<UAV> uavIterator = communication.iterator();
-                while (uavIterator.hasNext()){
+                while (uavIterator.hasNext()) {
                     UAV uav = uavIterator.next();
-                    if(uav.serialID == packet.getDst()){
+                    if (uav.serialID == packet.getDst()) {
                         packet.setNext(uav.serialID);
-                        this.linkLayer.send(packet);
+                        this.linkLayer.addSentQueue(packet);
                         isRouted = false;
                         break;
                     }
                 }
 
-                if(isRouted){
+                if (isRouted) {
                     int nextRouter = 0;
                     //true说明需要路由转发,遍历本路由器的路由表routerTable
-                    for (RouteTableItem routeTableItem : routeTable) {
+                    for (RouteTableItem routeTableItem : this.routeTable) {
                         if (packet.getDst() == routeTableItem.getDst()) {
                             //目的网段相同
                             nextRouter = routeTableItem.getNext();
                             break;
                         }
                     }
-                    if(nextRouter != 0){
+                    if (nextRouter != 0) {
                         packet.setNext(nextRouter);
-                        this.linkLayer.send(packet);
+                        logger.info("At " + PlaneWars.currentTime + "-" + this.serialID + ": 转发报文--目的地址 " + nextRouter + " 报文ID" + packet.packetID);
+                        this.linkLayer.addSentQueue(packet);
+                        //this.linkLayer.send(packet);
                     }
 
                 }
             }
         }
+    }
+
+
+
+    public void generatePacket(int dst) {
+        Packet packet = new Packet(this.serialID, dst, Math.toIntExact(PlaneWars.currentTime));
+        logger.info("At " + PlaneWars.currentTime + "-" + this.serialID + ": 生成报文--目的地址 " + dst + " 报文ID" + packet.packetID);
+        if(this.clusterStatus == ClusterStatus.ClusterMember){
+            packet.setNext(this.clusters.get(0).clusterHead.serialID);
+        }else {
+            this.linkLayer.addReceiveQueue(packet);
+        }
+
     }
 
 

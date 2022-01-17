@@ -2,20 +2,22 @@ package UAVs.network;
 
 public class Packet {
 
-    private int sequenceNumber;
+    private static int sequenceNumber = 1;
     private int src;
     private int dst;
     private int next;
     private int creatTime;
     private int sentTme;
     private int receiveTime;
+    public int packetID;
 
 
     private short ackFlag;
 
-    public Packet(int src, int dst, int creatTime){
+    public Packet(int src, int dst, int creatTime) {
         this.src = src;
         this.dst = dst;
+        this.packetID = sequenceNumber++;
         this.creatTime = creatTime;
     }
 

@@ -14,7 +14,7 @@ public class Cluster {
     //本簇的成员
     private CopyOnWriteArrayList<Integer> memberList;
     //簇头
-    private UAV clusterHead;
+    public UAV clusterHead;
     private static int clusterNumber = 1;
     public final int memberNumber = 8;
     private int clusterID;

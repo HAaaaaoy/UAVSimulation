@@ -17,12 +17,12 @@ public class WirelessChannel extends Thread {
 
     public WirelessChannel() {
         transmissions = new CopyOnWriteArrayList<>();
+        this.start();
     }
 
     public synchronized void addTransmission(Transmission transmission) {
         this.transmissions.add(transmission);
-        logger.info("WLAN通信环境已创建");
-        this.start();
+
     }
 
     public void run() {
@@ -39,7 +39,7 @@ public class WirelessChannel extends Thread {
                 }
             }
             try {
-                Thread.sleep(50);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -47,8 +47,8 @@ public class WirelessChannel extends Thread {
     }
 
     public Boolean isAchieved(Transmission transmission) {
-        UAV src = UAVNetwork.getUavHashMap().get(transmission.getSrc());
-        UAV dst = UAVNetwork.getUavHashMap().get(transmission.getDst());
+        UAV src = UAVNetwork.uavHashMap.get(transmission.getSrc());
+        UAV dst = UAVNetwork.uavHashMap.get(transmission.getDst());
         if ((PlaneWars.currentTime - transmission.getCreatTime()) >= delay(src.calculateDistance(dst))) {
             return true;
         }
@@ -56,7 +56,7 @@ public class WirelessChannel extends Thread {
     }
 
     private int delay(int distance) {
-        return (int) Math.floor(0.1 * distance);
+        return (int) Math.floor(0.5 * distance);
     }
 
 

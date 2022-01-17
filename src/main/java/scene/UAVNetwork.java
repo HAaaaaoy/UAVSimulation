@@ -72,6 +72,17 @@ public class UAVNetwork {
         }
     }
 
+    public void communicationSim(){
+
+        for(UAV uav : movingList){
+            uav.start();
+        }
+//        Iterator<UAV> uavIterator = movingList.iterator();
+//        while (uavIterator.hasNext()){
+//            uavIterator.next().start();
+//        }
+    }
+
     //生成网络的路由
     public void RIP(){
         while (RIPNumber < 2000) {
@@ -85,7 +96,6 @@ public class UAVNetwork {
             }
         }
         logger.info("网关和簇头"+Route.routes.size());
-
     }
 
 

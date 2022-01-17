@@ -1,5 +1,6 @@
 package scene;
 
+import GUItil.GUItil;
 import UAVs.UAV;
 import org.apache.log4j.Logger;
 import route.Route;
@@ -8,6 +9,7 @@ import text.UAVsText;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Iterator;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class PlaneWars extends JPanel {
 
@@ -55,7 +57,29 @@ public class PlaneWars extends JPanel {
                         for (UAV uav : Route.routes) {
                             uav.printRouterTable();
                         }
-                        runningFlag = false;
+                        uavNetwork.communicationSim();
+                        uavNetwork.status = SimulationStatus.Communicate;
+                        try {
+                            Thread.sleep(40);
+                            currentTime += 40;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }else if(uavNetwork.status.equals(SimulationStatus.Communicate)){
+                        uavNetwork.UAVsMoving();
+                        if(currentTime % 1000 == 0){
+                            int i = ThreadLocalRandom.current().nextInt(1,50);
+                            int j = ThreadLocalRandom.current().nextInt(1,50);
+                            if (!(i == j)){
+                                UAVNetwork.getUavHashMap().get(i).generatePacket(j);
+                            }
+                        }
+                        try {
+                            Thread.sleep(40);
+                            currentTime += 40;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                     repaint();
                 }
