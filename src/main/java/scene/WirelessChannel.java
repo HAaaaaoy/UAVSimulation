@@ -6,8 +6,11 @@ import org.apache.log4j.Logger;
 
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class WirelessChannel extends Thread {
+
+    private int random ;
     /**
      * 无线信道
      */
@@ -34,8 +37,11 @@ public class WirelessChannel extends Thread {
                 if (isAchieved(t)) {
                     //到达操作
                     transmissions.remove(t);
-                    UAVNetwork.getUavHashMap().get(t.getDst()).linkLayer.addReceiveQueue(t.getPacket());
-                    t.getPacket().setReceiveTime(Math.toIntExact(PlaneWars.currentTime));
+                    random = ThreadLocalRandom.current().nextInt(0,100);
+                    if(random <=90){
+                        UAVNetwork.getUavHashMap().get(t.getDst()).linkLayer.addReceiveQueue(t.getPacket());
+                        t.getPacket().setReceiveTime(Math.toIntExact(PlaneWars.currentTime));
+                    }
                 }
             }
             try {

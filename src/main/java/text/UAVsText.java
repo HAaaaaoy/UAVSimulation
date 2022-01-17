@@ -94,11 +94,8 @@ public class UAVsText extends Text {
 
     public void drawText(Graphics g){
         updatePosition();
-
         g.drawString(this.toString() , Reposition_x, Reposition_y);
     }
-
-
 
 
 }

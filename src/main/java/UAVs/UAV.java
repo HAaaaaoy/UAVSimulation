@@ -21,6 +21,7 @@ import route.ClusterStatus;
 import route.Route;
 import route.RouteTableItem;
 import scene.PlaneWars;
+import scene.SimulationStatus;
 import scene.UAVNetwork;
 import scene.WirelessChannel;
 import text.TextStatus;
@@ -65,6 +66,7 @@ public class UAV extends Thread {
     public UAVNetwork uavNetwork;
     //无人机显示文本
     private UAVsText uaVsText;
+    private String packetText = "";
 
     //网关或者簇头所用的路由表
     public CopyOnWriteArrayList<RouteTableItem> routeTable;
@@ -73,6 +75,7 @@ public class UAV extends Thread {
     public CopyOnWriteArrayList<UAV> communication = new CopyOnWriteArrayList<>();
 
     private int countNumber = 0;
+    private int receivedUavID = 0;
 
     public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, UAVNetwork uavNetwork) {
         this.position_index_x = position_index_x;
@@ -145,19 +148,31 @@ public class UAV extends Thread {
      */
     public void drawUAVs(Graphics g) {
         g.drawImage(UAV_image, position_index_x, position_index_y, UAV_Height, UAV_Width, null);
-        //绘制线条
-//        if (PlaneWars.Linkinfom.get(serialID) != null) {
-//            for (int i = 0; i < PlaneWars.Linkinfom.get(serialID).size(); i++) {
-//                g.drawLine(position_index_x + UAV_Width / 2, position_index_y + UAV_Width / 2,
-//                        PlaneWars.getRuaVs().get(PlaneWars.Linkinfom.get(serialID).get(i)).getPosition_index_x() + UAV_Width / 2,
-//                        PlaneWars.getRuaVs().get(PlaneWars.Linkinfom.get(serialID).get(i)).getPosition_index_y() + UAV_Width / 2);
-//            }
-//        }
-        //g.drawOval(position_index_x, position_index_y, 120, 120);
         if (this.cluster != null) {
-            g.drawOval(position_index_x + 60 - GUItil.getBounds().height / 2, position_index_y + 60 - GUItil.getBounds().height / 2, 2 * Cluster.clusterRadius, 2 * Cluster.clusterRadius);
+            if(uavNetwork.status.equals(SimulationStatus.FindCluster) || uavNetwork.status.equals(SimulationStatus.Route)){
+                g.drawOval(position_index_x + 60 - GUItil.getBounds().height / 2, position_index_y + 60 - GUItil.getBounds().height / 2, 2 * Cluster.clusterRadius, 2 * Cluster.clusterRadius);
+            }
+        }
+        if(countNumber > 0){
+            showReceivePacket(g);
+            countNumber--;
+            if(countNumber < 0 ){
+                countNumber = 0;
+            }
         }
 
+
+    }
+
+    public void showReceivePacket(Graphics g){
+        try{
+            g.drawString(packetText , position_index_x-10, position_index_y-5);
+            g.drawLine(position_index_x + UAV_Width / 2,position_index_y + UAV_Width / 2,
+                    UAVNetwork.uavHashMap.get(receivedUavID).position_index_x + UAV_Width / 2,
+                    UAVNetwork.uavHashMap.get(receivedUavID).position_index_y + UAV_Width / 2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -476,7 +491,10 @@ public class UAV extends Thread {
         if (!this.linkLayer.receiveQueue.isEmpty()) {
             Packet packet = linkLayer.receiveQueue.remove();
             if (packet.getDst() == this.serialID) {
-                logger.info(this.serialID + "收到来自" + packet.getSrc() + "的报文，ID为" + packet.packetID);
+                receivedUavID = packet.getSrc();
+                countNumber = 100;
+                packetText = "At" + PlaneWars.currentTime + this.serialID + "收到来自" + packet.getSrc() + "的报文，ID为" + packet.packetID + "时延" + (PlaneWars.currentTime- packet.getCreatTime());
+                logger.info("At" + PlaneWars.currentTime + this.serialID + "收到来自" + packet.getSrc() + "的报文，ID为" + packet.packetID + "时延" + (PlaneWars.currentTime- packet.getCreatTime()));
             } else {
                 Boolean isRouted = true;
                 Iterator<UAV> uavIterator = communication.iterator();
