@@ -38,7 +38,7 @@ public class UAVNetwork {
     public static CopyOnWriteArrayList<UAV> communicationList = new CopyOnWriteArrayList<>();
 
 
-    public UAVNetwork(int uavNumber){
+    public UAVNetwork(int uavNumber) {
         this.uavNumber = uavNumber;
         this.route = new Route();
     }
@@ -52,8 +52,8 @@ public class UAVNetwork {
         for (int i = 0; i < uavNumber; i++) {
             //在开始划分的时候随机平均
             int m = i % 6;
-            logger.info("第"+serialID+"号无人机初始化--IP地址："+"192.168.192." + serialID);
-            UAV uav = new UAV(ThreadLocalRandom.current().nextInt(m*GUItil.getBounds().width/7,(m+1)*GUItil.getBounds().width/7),
+            logger.info("第" + serialID + "号无人机初始化--IP地址：" + "192.168.192." + serialID);
+            UAV uav = new UAV(ThreadLocalRandom.current().nextInt(m * GUItil.getBounds().width / 7, (m + 1) * GUItil.getBounds().width / 7),
                     ThreadLocalRandom.current().nextInt(GUItil.getBounds().height),
                     height, width, ImageRead.NRUAVs, serialID, this);
 
@@ -67,45 +67,50 @@ public class UAVNetwork {
     //无人机移动
     public void UAVsMoving() {
         Iterator<UAV> iterator = movingList.iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             iterator.next().move();
         }
     }
 
-    public void communicationSim(){
-
-        for(UAV uav : movingList){
-            uav.start();
+    public void communicationSim() {
+        Iterator<UAV> uavIterator = movingList.iterator();
+        while (uavIterator.hasNext()) {
+            uavIterator.next().start();
         }
-//        Iterator<UAV> uavIterator = movingList.iterator();
-//        while (uavIterator.hasNext()){
-//            uavIterator.next().start();
-//        }
     }
 
     //生成网络的路由
-    public void RIP(){
+    public void RIP() {
         while (RIPNumber < 2000) {
-            for (UAV uav : Route.routes) {
-                try{
-                    uav.sentSelfRIP();
-                }finally {
-                    uav.D_V();
-                    RIPNumber++;
-                }
+            Iterator<UAV> uavIterator = Route.routes.iterator();
+            while (uavIterator.hasNext()) {
+                UAV uav = uavIterator.next();
+                uav.sentSelfRIP();
+                uav.D_V();
+                RIPNumber++;
             }
         }
-        logger.info("网关和簇头"+Route.routes.size());
+        logger.info("网关和簇头" + Route.routes.size());
     }
 
+    public void reRoute() {
+        this.notClusterList = new CopyOnWriteArrayList<>();
+        this.notClusterList.addAll(movingList);
+        Iterator<UAV> uavIterator = notClusterList.iterator();
+        while (uavIterator.hasNext()) {
+            uavIterator.next().cacheClear();
+        }
+        RIPNumber = 0;
+        this.status = SimulationStatus.FindCluster;
 
+    }
 
 
     public CopyOnWriteArrayList<UAVsText> getTexts() {
         return texts;
     }
 
-    public static HashMap<Integer, UAV> getUavHashMap(){
+    public static HashMap<Integer, UAV> getUavHashMap() {
         return uavHashMap;
     }
 

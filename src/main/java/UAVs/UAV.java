@@ -45,7 +45,6 @@ public class UAV extends Thread {
     private int serialID;
     //无人机的IP
     public NodeIP ip;
-    public CopyOnWriteArrayList<NodeIP> eths;
     //链路层
     public LinkLayer linkLayer;
 
@@ -550,6 +549,17 @@ public class UAV extends Thread {
         }else {
             this.linkLayer.addReceiveQueue(packet);
         }
+
+    }
+
+    public void cacheClear(){
+        routeTable.clear();
+        routeCache.clear();
+        communication.clear();
+        routeList.clear();
+        clusters.clear();
+        cluster = null;
+        clusterStatus = null;
 
     }
 
