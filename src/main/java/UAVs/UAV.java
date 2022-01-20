@@ -44,7 +44,8 @@ public class UAV extends Thread {
     //每个UAV唯一的编号
     private int serialID;
     //无人机的IP
-    private NodeIP ip;
+    public NodeIP ip;
+    public CopyOnWriteArrayList<NodeIP> eths;
     //链路层
     public LinkLayer linkLayer;
 
@@ -73,6 +74,7 @@ public class UAV extends Thread {
     public Map<UAV, CopyOnWriteArrayList<RouteTableItem>> routeCache = new HashMap<>();
     //与本UAV相连的其他簇头或网关
     public CopyOnWriteArrayList<UAV> communication = new CopyOnWriteArrayList<>();
+    public CopyOnWriteArrayList<UAV> routeList = new CopyOnWriteArrayList<>();
 
     private int countNumber = 0;
     private int receivedUavID = 0;
@@ -87,7 +89,7 @@ public class UAV extends Thread {
 //        this.ip = new NodeIP(ip);
         this.uavNetwork = uavNetwork;
         this.wifi = this.uavNetwork.wifi;
-        this.linkLayer = new LinkLayer(this.wifi);
+        this.linkLayer = new LinkLayer(this.wifi, this);
         this.uaVsText = new UAVsText(position_index_x, position_index_y, UAV_Height, serialID, this);
     }
 
@@ -157,6 +159,7 @@ public class UAV extends Thread {
             showReceivePacket(g);
             countNumber--;
             if(countNumber < 0 ){
+                this.routeList.clear();
                 countNumber = 0;
             }
         }
@@ -167,9 +170,13 @@ public class UAV extends Thread {
     public void showReceivePacket(Graphics g){
         try{
             g.drawString(packetText , position_index_x-10, position_index_y-5);
-            g.drawLine(position_index_x + UAV_Width / 2,position_index_y + UAV_Width / 2,
-                    UAVNetwork.uavHashMap.get(receivedUavID).position_index_x + UAV_Width / 2,
-                    UAVNetwork.uavHashMap.get(receivedUavID).position_index_y + UAV_Width / 2);
+            for(int i = 0 ; i < routeList.size()-1 ; i++){
+                UAV src = routeList.get(i);
+                UAV dst = routeList.get(i+1);
+                g.drawLine(src.position_index_x + UAV_Width / 2,src.position_index_y + UAV_Width / 2,
+                        dst.position_index_x + UAV_Width / 2,
+                        dst.position_index_y + UAV_Width / 2);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -433,8 +440,8 @@ public class UAV extends Thread {
                 //置下一跳路由器为发送路由其
                 sitem.setNext(sentUav.getSerialID());
                 //跳数加1
-                sitem.increaseHopNum(this.calculateDistance(sentUav));
-                //sitem.increaseHopNum();
+                //sitem.increaseHopNum(this.calculateDistance(sentUav));
+                sitem.increaseHopNum();
                 //存储目的网络相同的routingListItem'Index
                 int index = -1;
                 for (int i = 0; i < routeTable.size(); i++) {
@@ -494,7 +501,10 @@ public class UAV extends Thread {
                 receivedUavID = packet.getSrc();
                 countNumber = 100;
                 packetText = "At" + PlaneWars.currentTime + this.serialID + "收到来自" + packet.getSrc() + "的报文，ID为" + packet.packetID + "时延" + (PlaneWars.currentTime- packet.getCreatTime());
+                packet.routeList.add(this);
+                routeList = packet.routeList;
                 logger.info("At" + PlaneWars.currentTime + this.serialID + "收到来自" + packet.getSrc() + "的报文，ID为" + packet.packetID + "时延" + (PlaneWars.currentTime- packet.getCreatTime()));
+                logger.info("此报文经过的路由为： "+ this.routeList);
             } else {
                 Boolean isRouted = true;
                 Iterator<UAV> uavIterator = communication.iterator();

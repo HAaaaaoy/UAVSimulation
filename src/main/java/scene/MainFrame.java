@@ -31,6 +31,5 @@ public class MainFrame extends JFrame {
         //窗体可拉伸
         mf.setResizable(true);
         mf.setVisible(true);
-
     }
 }

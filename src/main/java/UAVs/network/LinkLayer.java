@@ -17,13 +17,16 @@ public class LinkLayer {
     //存储接受报文的队列
     public LinkedList<Packet> receiveQueue;
     private WirelessChannel wirelessChannel;
+    //所属的uav
+    private UAV uav;
 
     public final int windowSize = 5;
 
-    public LinkLayer(WirelessChannel wirelessChannel){
+    public LinkLayer(WirelessChannel wirelessChannel, UAV uav){
         this.sentQueue = new LinkedList<>();
         this.receiveQueue = new LinkedList<>();
         this.wirelessChannel = wirelessChannel;
+        this.uav = uav;
     }
 
     public synchronized void addSentQueue(Packet packet){
@@ -39,9 +42,9 @@ public class LinkLayer {
     }
 
     public void send(Packet packet, int next){
+        packet.routeList.add(uav);
         Transmission transmission = new Transmission(packet.getSrc(), next, packet, PlaneWars.currentTime);
         wirelessChannel.addTransmission(transmission);
-
     }
 
 

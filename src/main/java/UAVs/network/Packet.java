@@ -1,5 +1,9 @@
 package UAVs.network;
 
+import UAVs.UAV;
+
+import java.util.concurrent.CopyOnWriteArrayList;
+
 public class Packet {
 
     private static int sequenceNumber = 1;
@@ -10,6 +14,7 @@ public class Packet {
     private int sentTme;
     private int receiveTime;
     public int packetID;
+    public CopyOnWriteArrayList<UAV> routeList ;
 
 
     private short ackFlag;
@@ -19,6 +24,7 @@ public class Packet {
         this.dst = dst;
         this.packetID = sequenceNumber++;
         this.creatTime = creatTime;
+        this.routeList = new CopyOnWriteArrayList<>();
     }
 
     public int getSrc() {
