@@ -2,6 +2,7 @@ package scene;
 
 import GUItil.GUItil;
 import UAVs.UAV;
+import UAVs.network.Topology;
 import org.apache.log4j.Logger;
 import route.Route;
 import text.UAVsText;
@@ -46,8 +47,8 @@ public class PlaneWars extends JPanel {
                             uavNetwork.status = SimulationStatus.Route;
                         }
                         try {
-                            Thread.sleep(40);
-                            currentTime += 40;
+                            Thread.sleep(80);
+                            currentTime += 80;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -59,24 +60,29 @@ public class PlaneWars extends JPanel {
                         }
                         uavNetwork.communicationSim();
                         uavNetwork.status = SimulationStatus.Communicate;
+                        uavNetwork.topologyStatus = Topology.Grid;
                         try {
-                            Thread.sleep(40);
-                            currentTime += 40;
+                            Thread.sleep(80);
+                            currentTime += 80;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }else if(uavNetwork.status.equals(SimulationStatus.Communicate)){
                         uavNetwork.UAVsMoving();
-                        if(currentTime % 1000 == 0){
-                            int i = ThreadLocalRandom.current().nextInt(1,50);
-                            int j = ThreadLocalRandom.current().nextInt(1,50);
-                            if (!(i == j)){
-                                UAVNetwork.getUavHashMap().get(i).generatePacket(j);
-                            }
-                        }
+                        /**
+                         * 暂时不产生随机报文
+                         * */
+//                        if(currentTime % 1000 == 0){
+//                            int i = ThreadLocalRandom.current().nextInt(1,50);
+//                            int j = ThreadLocalRandom.current().nextInt(1,50);
+//                            if (!(i == j)){
+//                                UAVNetwork.getUavHashMap().get(i).generatePacket(j);
+//                            }
+//                        }
+
                         try {
-                            Thread.sleep(40);
-                            currentTime += 40;
+                            Thread.sleep(80);
+                            currentTime += 80;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

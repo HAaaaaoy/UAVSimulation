@@ -22,7 +22,7 @@ public class Cluster {
     public final int memberNumber = 8;
     private int clusterID;
     //簇半径
-    public static int clusterRadius = (int) (GUItil.getBounds().height / 2);
+    public static int clusterRadius = (int) (GUItil.getBounds().height / 4);
     //本簇的网关数量
     private int gateWayNumber = 0;
 
@@ -77,7 +77,7 @@ public class Cluster {
             member.routeTable.add(new RouteTableItem(this.clusterHead.getSerialID(), this.clusterHead.getSerialID(), 1));
             member.routeTable.add(new RouteTableItem(firstCluster.clusterHead.getSerialID(), firstCluster.clusterHead.getSerialID(), 1));
             this.gateWayNumber++;
-            this.memberList.add(member.getSerialID());
+            //this.memberList.add(member.getSerialID());
             return true;
         } else if (member.clusters.size() == 0 && member.cluster == null) {
             logger.info("At " + PlaneWars.currentTime + ": 第" + member.getSerialID() + "号无人机加入" + this.getClusterID() + "簇");

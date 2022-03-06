@@ -2,6 +2,7 @@ package scene;
 
 import GUItil.GUItil;
 import UAVs.UAV;
+import UAVs.network.Topology;
 import image.ImageRead;
 import org.apache.log4j.Logger;
 import route.Route;
@@ -23,7 +24,7 @@ public class UAVNetwork {
     //仿真时无人机的标注信息
     private CopyOnWriteArrayList<UAVsText> texts = new CopyOnWriteArrayList<>();
     //记录无人机入网时间
-
+    public Topology topologyStatus = Topology.Random;
     public Route route;
     Logger logger = Logger.getLogger(UAVNetwork.class);
 
@@ -38,6 +39,9 @@ public class UAVNetwork {
     public static CopyOnWriteArrayList<UAV> communicationList = new CopyOnWriteArrayList<>();
 
 
+    public int gridCount = 0;
+    public int lineCount = 0;
+
     public UAVNetwork(int uavNumber) {
         this.uavNumber = uavNumber;
         this.route = new Route();
@@ -46,9 +50,9 @@ public class UAVNetwork {
 
     public void initUAVs() {
         //无人机高度设为120
-        int height = 120;
+        int height = 50;
         //无人机宽度设为120
-        int width = 120;
+        int width = 50;
         for (int i = 0; i < uavNumber; i++) {
             //在开始划分的时候随机平均
             int m = i % 6;
@@ -68,7 +72,13 @@ public class UAVNetwork {
     public void UAVsMoving() {
         Iterator<UAV> iterator = movingList.iterator();
         while (iterator.hasNext()) {
-            iterator.next().move();
+            iterator.next().move(topologyStatus);
+        }
+        if(topologyStatus==Topology.Grid){
+            if(gridCount<=30)  gridCount++;
+        }
+        if(topologyStatus==Topology.Line){
+            if(lineCount<=50)  lineCount++;
         }
     }
 
