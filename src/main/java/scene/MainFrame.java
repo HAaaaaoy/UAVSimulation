@@ -4,22 +4,24 @@ import GUItil.GUItil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class MainFrame extends JFrame {
     //创建Jpanle的对象
     PlaneWars pw = new PlaneWars();
+
     //创建MainFrame的构造器，初始化对象
-    public MainFrame (){
+    public MainFrame() throws IOException {
         pw.setFocusable(true);
         pw.requestFocus();
         this.add(pw, BorderLayout.CENTER);
     }
 
-    public void start(){
+    public void start() {
         pw.startSimulation();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         MainFrame mf = new MainFrame();
         mf.start();
         mf.setTitle("无线局域网");

@@ -11,12 +11,16 @@ public class ImageRead {
     public static BufferedImage RUAVs;
     public static BufferedImage GateWays;
     public static BufferedImage map;
+    public static BufferedImage cloudOriginal;
+    public static BufferedImage cloudBlue;
     static {
         try {
             NRUAVs = ImageIO.read(new FileInputStream("./image/NRUAVs.png"));
             RUAVs = ImageIO.read(new FileInputStream("./image/RUAVs.png"));
             GateWays = ImageIO.read(new FileInputStream("./image/GateWayUAV.png"));
             map = ImageIO.read(new FileInputStream("./image/map.jpeg"));
+            cloudOriginal = ImageIO.read(new FileInputStream("./image/cloud.png"));
+            cloudBlue = ImageIO.read(new FileInputStream("./image/cloud_blue.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

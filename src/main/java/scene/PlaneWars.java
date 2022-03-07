@@ -1,6 +1,7 @@
 package scene;
 
 import GUItil.GUItil;
+import UAVs.CloudDraw;
 import UAVs.UAV;
 import UAVs.network.Topology;
 import org.apache.log4j.Logger;
@@ -10,7 +11,6 @@ import text.UAVsText;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Iterator;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class PlaneWars extends JPanel {
 
@@ -21,8 +21,13 @@ public class PlaneWars extends JPanel {
     public UAVNetwork uavNetwork;
     private Boolean runningFlag = true;
 
+
+    public final int areaWidth = GUItil.getBounds().width/25;
+    public final int areaHeight = GUItil.getBounds().height/15;
+
+
     public PlaneWars() {
-        uavNetwork = new UAVNetwork(50);
+        uavNetwork = new UAVNetwork(64);
     }
 
 
@@ -36,6 +41,7 @@ public class PlaneWars extends JPanel {
             @Override
             public void run() {
                 uavNetwork.initUAVs();
+                uavNetwork.initCloud();
                 while (runningFlag) {
                     //入网过程
                     if (uavNetwork.status.equals(SimulationStatus.FindCluster)) {
@@ -47,8 +53,8 @@ public class PlaneWars extends JPanel {
                             uavNetwork.status = SimulationStatus.Route;
                         }
                         try {
-                            Thread.sleep(80);
-                            currentTime += 80;
+                            Thread.sleep(50);
+                            currentTime += 50;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -60,14 +66,14 @@ public class PlaneWars extends JPanel {
                         }
                         uavNetwork.communicationSim();
                         uavNetwork.status = SimulationStatus.Communicate;
-                        uavNetwork.topologyStatus = Topology.Grid;
+                        uavNetwork.topologyStatus = Topology.Line;
                         try {
                             Thread.sleep(80);
                             currentTime += 80;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                    }else if(uavNetwork.status.equals(SimulationStatus.Communicate)){
+                    } else if (uavNetwork.status.equals(SimulationStatus.Communicate)) {
                         uavNetwork.UAVsMoving();
                         /**
                          * 暂时不产生随机报文
@@ -81,11 +87,29 @@ public class PlaneWars extends JPanel {
 //                        }
 
                         try {
-                            Thread.sleep(80);
-                            currentTime += 80;
+                            Thread.sleep(50);
+                            currentTime += 50;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
+                    }else if(uavNetwork.status.equals(SimulationStatus.ForCruise)){
+                        uavNetwork.UAVsMoving();
+                        try {
+                            Thread.sleep(50);
+                            currentTime += 50;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }else if(uavNetwork.status.equals(SimulationStatus.Cruise)){
+                        uavNetwork.UAVsMoving();
+                        uavNetwork.totalCluster.clusterMove();
+                        try {
+                            Thread.sleep(60);
+                            currentTime += 60;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
                     }
                     repaint();
                 }
@@ -99,6 +123,7 @@ public class PlaneWars extends JPanel {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
+        drawBackGround(g);
         paintUAVs(g);
         drawText(g);
     }
@@ -116,6 +141,16 @@ public class PlaneWars extends JPanel {
         while (iterator.hasNext()) {
             iterator.next().drawText(g);
         }
+
+    }
+
+    public void drawBackGround(Graphics g) {
+        Iterator<CloudDraw> iterator = uavNetwork.cloudDraws.iterator();
+        while (iterator.hasNext()) {
+            CloudDraw cloudDraw = iterator.next();
+            g.drawImage(cloudDraw.image,cloudDraw.x, cloudDraw.y,areaWidth,areaHeight,this);
+        }
+
 
     }
 

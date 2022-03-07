@@ -19,10 +19,10 @@ public class Cluster {
     //簇头
     public UAV clusterHead;
     private static int clusterNumber = 1;
-    public final int memberNumber = 8;
+    public final int memberNumber = 7;
     private int clusterID;
     //簇半径
-    public static int clusterRadius = (int) (GUItil.getBounds().height / 4);
+    public static int clusterRadius = (int) (GUItil.getBounds().width);
     //本簇的网关数量
     private int gateWayNumber = 0;
 

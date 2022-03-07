@@ -82,6 +82,9 @@ public class UAV extends Thread {
     private int countNumber = 0;
     private int receivedUavID = 0;
 
+    public int targetX, targetY;
+
+
     public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, UAVNetwork uavNetwork) {
         this.position_index_x = position_index_x;
         this.position_index_y = position_index_y;
@@ -119,7 +122,7 @@ public class UAV extends Thread {
             moveRandomly();
         } else if (topologyStatus == Topology.Grid) {
             moveGridly();
-        } else if(topologyStatus == Topology.Line){
+        } else if (topologyStatus == Topology.Line) {
             moveLinely();
         }
     }
@@ -161,12 +164,29 @@ public class UAV extends Thread {
 
     public void moveGridly() {
         if (clusterStatus == ClusterStatus.ClusterHead) {
-            moveRandomly();
-            if (uavNetwork.gridCount >= 30) {
+            if (uavNetwork.status == SimulationStatus.Communicate) {
+                moveRandomly();
+                if (uavNetwork.gridCount >= 30) {
+                    for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                        UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        member.memberMoveGridly();
+                    }
+                }
+            } else if (uavNetwork.status == SimulationStatus.ForCruise) {
+                position_index_x = position_index_x + (targetX - position_index_x) / moveSpeed;
+                position_index_y = position_index_y + (targetY - position_index_y) / moveSpeed;
                 for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
                     UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
                     member.memberMoveGridly();
                 }
+            } else if (uavNetwork.status == SimulationStatus.Cruise) {
+                position_index_x = targetX;
+                position_index_y = targetY;
+                for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                    UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                    member.memberMoveGridly();
+                }
+
             }
         } else {
             if (uavNetwork.gridCount <= 30) {
@@ -292,18 +312,34 @@ public class UAV extends Thread {
 
     public void moveLinely() {
         if (clusterStatus == ClusterStatus.ClusterHead) {
-            moveRandomly();
-            if (uavNetwork.lineCount >= 50) {
+            if (uavNetwork.status == SimulationStatus.Communicate) {
+                moveRandomly();
+                if (uavNetwork.lineCount >= 30) {
+                    for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                        UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        member.memberMoveLinely();
+                    }
+                }
+            } else if (uavNetwork.status == SimulationStatus.ForCruise) {
+                position_index_x = position_index_x + (targetX - position_index_x) / moveSpeed;
+                position_index_y = position_index_y + (targetY - position_index_y) / moveSpeed;
+                for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                    UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                    member.memberMoveLinely();
+                }
+            } else if (uavNetwork.status == SimulationStatus.Cruise) {
+                position_index_x = targetX;
+                position_index_y = targetY;
                 for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
                     UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
                     member.memberMoveLinely();
                 }
             }
         } else {
-            if (uavNetwork.lineCount <= 50) {
+            if (uavNetwork.lineCount <= 30) {
                 int position = clusters.get(0).getMemberList().indexOf((Integer) this.serialID);
                 UAV head = clusters.get(0).clusterHead;
-                if (calculateDistance(head.position_index_x + (position + 1) * lineDistance,head.position_index_y) <= lineDistance) {
+                if (calculateDistance(head.position_index_x + (position + 1) * lineDistance, head.position_index_y) <= lineDistance) {
                     position_index_x = head.position_index_x + (position + 1) * lineDistance;
                     position_index_y = head.position_index_y;
                 } else {
@@ -314,7 +350,7 @@ public class UAV extends Thread {
         }
     }
 
-    public void memberMoveLinely(){
+    public void memberMoveLinely() {
         int position = clusters.get(0).getMemberList().indexOf((Integer) this.serialID);
         UAV head = clusters.get(0).clusterHead;
         position_index_x = head.position_index_x + (position + 1) * lineDistance;
@@ -331,8 +367,6 @@ public class UAV extends Thread {
                 g.drawOval(position_index_x + UAV_Height / 2 - GUItil.getBounds().height / 2, position_index_y + UAV_Width / 2 - GUItil.getBounds().height / 2, 2 * Cluster.clusterRadius, 2 * Cluster.clusterRadius);
             }
         }
-
-
         if (countNumber > 0) {
             showReceivePacket(g);
             countNumber--;
@@ -375,9 +409,9 @@ public class UAV extends Thread {
 
     public int calculateDistance(int x, int y) {
         //求两无人机的中心点
-        int u1x = this.position_index_x ;
-        int u1y = this.position_index_y  ;
-        int u2x = x ;
+        int u1x = this.position_index_x;
+        int u1y = this.position_index_y;
+        int u2x = x;
         int u2y = y;
         return (int) Math.sqrt(Math.abs(u1x - u2x) * Math.abs(u1x - u2x) + Math.abs(u1y - u2y) * Math.abs(u1y - u2y));
     }
@@ -541,6 +575,7 @@ public class UAV extends Thread {
 
     public Cluster setCluster() {
         this.cluster = new Cluster(this);
+        uavNetwork.totalCluster.clusters.add(this.cluster);
         logger.info("At " + PlaneWars.currentTime + ": 第" + serialID + "号无人机成为簇头，簇编号--" + this.cluster.getClusterID());
         this.clusterStatus = ClusterStatus.ClusterHead;
         this.UAV_image = ImageRead.RUAVs;

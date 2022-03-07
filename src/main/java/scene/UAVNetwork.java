@@ -1,13 +1,17 @@
 package scene;
 
 import GUItil.GUItil;
+import UAVs.CloudDraw;
 import UAVs.UAV;
 import UAVs.network.Topology;
 import image.ImageRead;
 import org.apache.log4j.Logger;
 import route.Route;
+import route.TotalCluster;
 import text.UAVsText;
 
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -38,13 +42,23 @@ public class UAVNetwork {
     private int RIPNumber = 0;
     public static CopyOnWriteArrayList<UAV> communicationList = new CopyOnWriteArrayList<>();
 
-
     public int gridCount = 0;
     public int lineCount = 0;
+
+
+    public final int areaWidth = GUItil.getBounds().width/25;
+    public final int areaHeight = GUItil.getBounds().height/15;
+
+
+    public ArrayList<CloudDraw> cloudDraws = new ArrayList<>();
+
+
+    public TotalCluster totalCluster;
 
     public UAVNetwork(int uavNumber) {
         this.uavNumber = uavNumber;
         this.route = new Route();
+        this.totalCluster = new TotalCluster(this);
     }
 
 
@@ -68,6 +82,29 @@ public class UAVNetwork {
         }
     }
 
+    public void initCloud(){
+        BufferedImage cloudOriginal = ImageRead.cloudOriginal;
+        int x = 0, y = 0;
+        while (true) {
+            if (x > GUItil.getBounds().width && y>GUItil.getBounds().height) break;
+            if (x > GUItil.getBounds().width) {
+//                CloudDraw cloudDraw = new CloudDraw(cloudOriginal,x,y);
+//                cloudDraws.add(cloudDraw);
+                x = 0;
+                y += areaHeight;
+                if(y>GUItil.getBounds().height) break;
+            } else {
+                CloudDraw cloudDraw = new CloudDraw(cloudOriginal,x,y);
+                cloudDraws.add(cloudDraw);
+                x += areaWidth;
+
+
+            }
+        }
+        System.out.println(cloudDraws.size());
+
+    }
+
     //无人机移动
     public void UAVsMoving() {
         Iterator<UAV> iterator = movingList.iterator();
@@ -75,10 +112,24 @@ public class UAVNetwork {
             iterator.next().move(topologyStatus);
         }
         if(topologyStatus==Topology.Grid){
-            if(gridCount<=30)  gridCount++;
+            if(gridCount<=90)  gridCount++;
+            if(gridCount>=90){
+                status=SimulationStatus.Cruise;
+            }
+            else if(gridCount>45) {
+                status=SimulationStatus.ForCruise;
+                totalCluster.initStartPosition(topologyStatus);
+            }
         }
         if(topologyStatus==Topology.Line){
-            if(lineCount<=50)  lineCount++;
+            if(lineCount<=90)  lineCount++;
+            if(lineCount>=90){
+                status=SimulationStatus.Cruise;
+            }
+            else if(lineCount>45) {
+                status=SimulationStatus.ForCruise;
+                totalCluster.initStartPosition(topologyStatus);
+            }
         }
     }
 
