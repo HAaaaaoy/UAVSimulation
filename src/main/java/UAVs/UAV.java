@@ -53,9 +53,10 @@ public class UAV extends Thread {
     private int random_move;
     //无人机图标
     BufferedImage UAV_image;
-    public final int gridDistance = 50;
-    public final int lineDistance = 40;
-    public final int moveSpeed = 20;
+    public int gridDistance = 50;
+    public int lineDistance = 40;
+    public int circleDistance = 75;
+    public int moveSpeed = 30;
     //虚拟坐标
     private Point virtualPosition;
     private int ack[] = {1};
@@ -83,6 +84,14 @@ public class UAV extends Thread {
     private int receivedUavID = 0;
 
     public int targetX, targetY;
+
+    public void setClusterNumber(int clusterNumber) {
+        this.clusterNumber = clusterNumber;
+    }
+
+    public int clusterNumber;
+
+
 
 
     public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, UAVNetwork uavNetwork) {
@@ -124,6 +133,8 @@ public class UAV extends Thread {
             moveGridly();
         } else if (topologyStatus == Topology.Line) {
             moveLinely();
+        } else if (topologyStatus == Topology.Circle) {
+            moveCircly();
         }
     }
 
@@ -166,7 +177,7 @@ public class UAV extends Thread {
         if (clusterStatus == ClusterStatus.ClusterHead) {
             if (uavNetwork.status == SimulationStatus.Communicate) {
                 moveRandomly();
-                if (uavNetwork.gridCount >= 30) {
+                if (uavNetwork.gridCount >= 300) {
                     for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
                         UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
                         member.memberMoveGridly();
@@ -186,10 +197,9 @@ public class UAV extends Thread {
                     UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
                     member.memberMoveGridly();
                 }
-
             }
         } else {
-            if (uavNetwork.gridCount <= 30) {
+            if (uavNetwork.gridCount <= 300) {
                 int position = clusters.get(0).getMemberList().indexOf((Integer) this.serialID);
                 UAV head = clusters.get(0).clusterHead;
                 switch (position) {
@@ -239,7 +249,7 @@ public class UAV extends Thread {
                         }
                         break;
                     case 5:
-                        if (calculateDistance(head) <= 20) {
+                        if (calculateDistance(head) <= gridDistance) {
                             position_index_x = head.position_index_x + gridDistance;
                             position_index_y = head.position_index_y - gridDistance;
                         } else {
@@ -314,7 +324,7 @@ public class UAV extends Thread {
         if (clusterStatus == ClusterStatus.ClusterHead) {
             if (uavNetwork.status == SimulationStatus.Communicate) {
                 moveRandomly();
-                if (uavNetwork.lineCount >= 30) {
+                if (uavNetwork.lineCount >= 300) {
                     for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
                         UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
                         member.memberMoveLinely();
@@ -336,7 +346,7 @@ public class UAV extends Thread {
                 }
             }
         } else {
-            if (uavNetwork.lineCount <= 30) {
+            if (uavNetwork.lineCount <= 300) {
                 int position = clusters.get(0).getMemberList().indexOf((Integer) this.serialID);
                 UAV head = clusters.get(0).clusterHead;
                 if (calculateDistance(head.position_index_x + (position + 1) * lineDistance, head.position_index_y) <= lineDistance) {
@@ -357,6 +367,155 @@ public class UAV extends Thread {
         position_index_y = head.position_index_y;
     }
 
+
+    public void moveCircly() {
+        if (clusterStatus == ClusterStatus.ClusterHead) {
+            if (uavNetwork.status == SimulationStatus.Communicate) {
+                moveRandomly();
+                if (uavNetwork.circleCount >= 300) {
+                    for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                        UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        member.memberMoveCircly();
+                    }
+                }
+            } else if (uavNetwork.status == SimulationStatus.ForCruise) {
+                position_index_x = position_index_x + (targetX - position_index_x) / moveSpeed;
+                position_index_y = position_index_y + (targetY - position_index_y) / moveSpeed;
+                for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                    UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                    member.memberMoveCircly();
+                }
+            } else if (uavNetwork.status == SimulationStatus.Cruise) {
+                position_index_x = targetX;
+                position_index_y = targetY;
+                for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                    UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                    member.memberMoveCircly();
+                }
+            }
+        } else {
+            if (uavNetwork.circleCount <= 300) {
+                int position = clusters.get(0).getMemberList().indexOf((Integer) this.serialID);
+                UAV head = clusters.get(0).clusterHead;
+                switch (position) {
+                    case 0:
+                        if (calculateDistance(head) <= circleDistance) {
+                            position_index_x = head.position_index_x;
+                            position_index_y = head.position_index_y - circleDistance;
+                        } else {
+                            position_index_x = position_index_x + (head.position_index_x - position_index_x) / moveSpeed;
+                            position_index_y = position_index_y + (head.position_index_y - circleDistance - position_index_y) / moveSpeed;
+                        }
+                        break;
+                    case 1:
+                        if (calculateDistance(head) <= circleDistance) {
+                            position_index_x = head.position_index_x;
+                            position_index_y = head.position_index_y + circleDistance;
+                        } else {
+                            position_index_x = position_index_x + (head.position_index_x - position_index_x) / moveSpeed;
+                            position_index_y = position_index_y + (head.position_index_y + circleDistance - position_index_y) / moveSpeed;
+                        }
+                        break;
+                    case 2:
+                        if (calculateDistance(head) <= circleDistance) {
+                            position_index_x = head.position_index_x - circleDistance;
+                            position_index_y = head.position_index_y;
+                        } else {
+                            position_index_x = position_index_x + (head.position_index_x - circleDistance - position_index_x) / moveSpeed;
+                            position_index_y = position_index_y + (head.position_index_y - position_index_y) / moveSpeed;
+                        }
+                        break;
+                    case 3:
+                        if (calculateDistance(head) <= circleDistance) {
+                            position_index_x = head.position_index_x + circleDistance;
+                            position_index_y = head.position_index_y;
+                        } else {
+                            position_index_x = position_index_x + (head.position_index_x + circleDistance - position_index_x) / moveSpeed;
+                            position_index_y = position_index_y + (head.position_index_y - position_index_y) / moveSpeed;
+                        }
+                        break;
+                    case 4:
+                        if (calculateDistance(head) <= circleDistance) {
+                            position_index_x = head.position_index_x - (int) (circleDistance / 1.5);
+                            position_index_y = head.position_index_y - (int) (circleDistance / 1.5);
+                        } else {
+                            position_index_x = position_index_x + (head.position_index_x - (int) (circleDistance / 1.5) - position_index_x) / moveSpeed;
+                            position_index_y = position_index_y + (head.position_index_y - (int) (circleDistance / 1.5) - position_index_y) / moveSpeed;
+                        }
+                        break;
+                    case 5:
+                        if (calculateDistance(head) <= circleDistance) {
+                            position_index_x = head.position_index_x + (int) (circleDistance / 1.5);
+                            position_index_y = head.position_index_y - (int) (circleDistance / 1.5);
+                        } else {
+                            position_index_x = position_index_x + (head.position_index_x + (int) (circleDistance / 1.5) - position_index_x) / moveSpeed;
+                            position_index_y = position_index_y + (head.position_index_y - (int) (circleDistance / 1.5) - position_index_y) / moveSpeed;
+                        }
+                        break;
+                    case 6:
+                        if (calculateDistance(head) <= circleDistance) {
+                            position_index_x = head.position_index_x - (int) (circleDistance / 1.5);
+                            position_index_y = head.position_index_y + (int) (circleDistance / 1.5);
+                        } else {
+                            position_index_x = position_index_x + (head.position_index_x - (int) (circleDistance / 1.5) - position_index_x) / moveSpeed;
+                            position_index_y = position_index_y + (head.position_index_y + (int) (circleDistance / 1.5) - position_index_y) / moveSpeed;
+                        }
+                        break;
+
+                    case 7:
+                        if (calculateDistance(head) <= circleDistance) {
+                            position_index_x = head.position_index_x + (int) (circleDistance / 1.5);
+                            position_index_y = head.position_index_y + (int) (circleDistance / 1.5);
+                        } else {
+                            position_index_x = position_index_x + (head.position_index_x + (int) (circleDistance / 1.5) - position_index_x) / moveSpeed;
+                            position_index_y = position_index_y + (head.position_index_y + (int) (circleDistance / 1.5) - position_index_y) / moveSpeed;
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    public void memberMoveCircly() {
+        int position = clusters.get(0).getMemberList().indexOf((Integer) this.serialID);
+        UAV head = clusters.get(0).clusterHead;
+        switch (position) {
+            case 0:
+                position_index_x = head.position_index_x;
+                position_index_y = head.position_index_y - circleDistance;
+                break;
+            case 1:
+                position_index_x = head.position_index_x;
+                position_index_y = head.position_index_y + circleDistance;
+                break;
+            case 2:
+                position_index_x = head.position_index_x - circleDistance;
+                position_index_y = head.position_index_y;
+                break;
+            case 3:
+                position_index_x = head.position_index_x + circleDistance;
+                position_index_y = head.position_index_y;
+                break;
+            case 4:
+                position_index_x = head.position_index_x - (int) (circleDistance / 1.5);
+                position_index_y = head.position_index_y - (int) (circleDistance / 1.5);
+                break;
+            case 5:
+                position_index_x = head.position_index_x + (int) (circleDistance / 1.5);
+                position_index_y = head.position_index_y - (int) (circleDistance / 1.5);
+                break;
+            case 6:
+                position_index_x = head.position_index_x - (int) (circleDistance / 1.5);
+                position_index_y = head.position_index_y + (int) (circleDistance / 1.5);
+                break;
+            case 7:
+                position_index_x = head.position_index_x + (int) (circleDistance / 1.5);
+                position_index_y = head.position_index_y + (int) (circleDistance / 1.5);
+                break;
+        }
+    }
+
+
     /**
      * 绘图
      */
@@ -375,8 +534,6 @@ public class UAV extends Thread {
                 countNumber = 0;
             }
         }
-
-
     }
 
     public void showReceivePacket(Graphics g) {
@@ -392,7 +549,6 @@ public class UAV extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
 
@@ -575,6 +731,9 @@ public class UAV extends Thread {
 
     public Cluster setCluster() {
         this.cluster = new Cluster(this);
+        if(uavNetwork.clusterMemberNumber!=0){
+            this.cluster.memberNumber = uavNetwork.clusterMemberNumber;
+        }
         uavNetwork.totalCluster.clusters.add(this.cluster);
         logger.info("At " + PlaneWars.currentTime + ": 第" + serialID + "号无人机成为簇头，簇编号--" + this.cluster.getClusterID());
         this.clusterStatus = ClusterStatus.ClusterHead;

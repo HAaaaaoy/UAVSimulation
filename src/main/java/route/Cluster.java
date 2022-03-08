@@ -19,7 +19,7 @@ public class Cluster {
     //簇头
     public UAV clusterHead;
     private static int clusterNumber = 1;
-    public final int memberNumber = 7;
+    public  int memberNumber = 7;
     private int clusterID;
     //簇半径
     public static int clusterRadius = (int) (GUItil.getBounds().width);
@@ -41,6 +41,10 @@ public class Cluster {
 
     public void setMemberList(CopyOnWriteArrayList<Integer> memberList) {
         this.memberList = memberList;
+    }
+
+    public void setMemberNumber(int number){
+        this.memberNumber = number;
     }
 
     public Boolean addClusterMember(UAV member) {

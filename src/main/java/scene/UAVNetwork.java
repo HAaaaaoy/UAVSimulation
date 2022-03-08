@@ -14,7 +14,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -35,7 +34,7 @@ public class UAVNetwork {
     //记录无人机感染的时间
     public HashMap<Integer, Long> timeRecord = new HashMap<>();
     //仿真状态
-    public SimulationStatus status = SimulationStatus.FindCluster;
+    public SimulationStatus status = SimulationStatus.OffLine;
     private int serialID = 1;
 
     public WirelessChannel wifi = new WirelessChannel();
@@ -44,13 +43,30 @@ public class UAVNetwork {
 
     public int gridCount = 0;
     public int lineCount = 0;
+    public int circleCount = 0;
+
+    //画图用
+    public int meshUavCount = 0;
+    public ArrayList<Long> meshTime = new ArrayList<>();
 
 
-    public final int areaWidth = GUItil.getBounds().width/25;
-    public final int areaHeight = GUItil.getBounds().height/15;
+    public int areaWidth;
+    public int areaHeight;
+    public int width;
+    public int height;
 
+    public final int uavHeight = 50;
+    public final int uavWidth = 50;
 
     public ArrayList<CloudDraw> cloudDraws = new ArrayList<>();
+
+    public void setClusterMemberNumber(int clusterMemberNumber) {
+        this.clusterMemberNumber = clusterMemberNumber;
+    }
+
+    public int clusterMemberNumber = 0;
+
+
 
 
     public TotalCluster totalCluster;
@@ -63,17 +79,13 @@ public class UAVNetwork {
 
 
     public void initUAVs() {
-        //无人机高度设为120
-        int height = 50;
-        //无人机宽度设为120
-        int width = 50;
         for (int i = 0; i < uavNumber; i++) {
             //在开始划分的时候随机平均
             int m = i % 6;
             logger.info("第" + serialID + "号无人机初始化--IP地址：" + "192.168.192." + serialID);
-            UAV uav = new UAV(ThreadLocalRandom.current().nextInt(m * GUItil.getBounds().width / 7, (m + 1) * GUItil.getBounds().width / 7),
-                    ThreadLocalRandom.current().nextInt(GUItil.getBounds().height),
-                    height, width, ImageRead.NRUAVs, serialID, this);
+            UAV uav = new UAV(ThreadLocalRandom.current().nextInt(m * width / 7, (m + 1) * width / 7),
+                    ThreadLocalRandom.current().nextInt(height),
+                    uavHeight, uavWidth, ImageRead.NRUAVs, serialID, this);
 
             notClusterList.add(uav);
             movingList.add(uav);
@@ -82,23 +94,19 @@ public class UAVNetwork {
         }
     }
 
-    public void initCloud(){
+    public void initCloud() {
         BufferedImage cloudOriginal = ImageRead.cloudOriginal;
         int x = 0, y = 0;
         while (true) {
-            if (x > GUItil.getBounds().width && y>GUItil.getBounds().height) break;
-            if (x > GUItil.getBounds().width) {
-//                CloudDraw cloudDraw = new CloudDraw(cloudOriginal,x,y);
-//                cloudDraws.add(cloudDraw);
+            if (x > width && y > height) break;
+            if (x > width) {
                 x = 0;
                 y += areaHeight;
-                if(y>GUItil.getBounds().height) break;
+                if (y > height) break;
             } else {
-                CloudDraw cloudDraw = new CloudDraw(cloudOriginal,x,y);
+                CloudDraw cloudDraw = new CloudDraw(cloudOriginal, x, y);
                 cloudDraws.add(cloudDraw);
                 x += areaWidth;
-
-
             }
         }
         System.out.println(cloudDraws.size());
@@ -111,26 +119,34 @@ public class UAVNetwork {
         while (iterator.hasNext()) {
             iterator.next().move(topologyStatus);
         }
-        if(topologyStatus==Topology.Grid){
-            if(gridCount<=90)  gridCount++;
-            if(gridCount>=90){
-                status=SimulationStatus.Cruise;
-            }
-            else if(gridCount>45) {
-                status=SimulationStatus.ForCruise;
+        if (topologyStatus == Topology.Grid) {
+            if (gridCount <= 600) gridCount++;
+            if (gridCount >= 600) {
+                status = SimulationStatus.Cruise;
+            } else if (gridCount > 450) {
+                status = SimulationStatus.ForCruise;
                 totalCluster.initStartPosition(topologyStatus);
             }
         }
-        if(topologyStatus==Topology.Line){
-            if(lineCount<=90)  lineCount++;
-            if(lineCount>=90){
-                status=SimulationStatus.Cruise;
-            }
-            else if(lineCount>45) {
-                status=SimulationStatus.ForCruise;
+        if (topologyStatus == Topology.Line) {
+            if (lineCount <= 600) lineCount++;
+            if (lineCount >= 600) {
+                status = SimulationStatus.Cruise;
+            } else if (lineCount > 450) {
+                status = SimulationStatus.ForCruise;
                 totalCluster.initStartPosition(topologyStatus);
             }
         }
+        if (topologyStatus == Topology.Circle) {
+            if (circleCount <= 600) circleCount++;
+            if (circleCount >= 600) {
+                status = SimulationStatus.Cruise;
+            } else if (circleCount > 450) {
+                status = SimulationStatus.ForCruise;
+                totalCluster.initStartPosition(topologyStatus);
+            }
+        }
+
     }
 
     public void communicationSim() {

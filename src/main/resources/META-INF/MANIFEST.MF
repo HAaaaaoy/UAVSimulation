@@ -1,3 +1,6 @@
 Manifest-Version: 1.0
-Main-Class: scene.MainFrame
+Main-Class: Start
+Class-Path: forms_rt-142.1.jar javafx-graphics-11-win.jar jcommon-1.0.23
+ .jar javafx-base-11.jar log4j-1.2.17.jar javafx-graphics-11.jar javafx-
+ base-11-win.jar jfreechart-1.0.19.jar
 

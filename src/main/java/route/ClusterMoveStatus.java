@@ -1,5 +1,5 @@
 package route;
 
 public enum ClusterMoveStatus {
-    Right, Down, Left
+    Right, Down, Left, Stop
 }

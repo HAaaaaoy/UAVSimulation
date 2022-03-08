@@ -6,7 +6,6 @@ import UAVs.network.Topology;
 import image.ImageRead;
 import scene.UAVNetwork;
 
-import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TotalCluster {
@@ -14,23 +13,19 @@ public class TotalCluster {
     public CopyOnWriteArrayList<Cluster> clusters;
     public int left, right, top, bottom;
     public ClusterMoveStatus moveStatus = ClusterMoveStatus.Right;
+    public ClusterMoveStatus lastMoveStatus;
     public Topology topology;
 
     public UAVNetwork uavNetwork;
 
-    public int areaWidth;
-    public int areaHeight;
-
 
     public TotalCluster(UAVNetwork uavNetwork) {
         this.uavNetwork = uavNetwork;
-        this.areaWidth = uavNetwork.areaWidth;
-        this.areaHeight = uavNetwork.areaHeight;
         clusters = new CopyOnWriteArrayList<>();
     }
 
     public void initStartPosition(Topology topology) {
-        if (topology == Topology.Grid) {
+        if (topology == Topology.Grid || topology==Topology.Circle) {
             this.topology = topology;
             left = 0;
             top = 0;
@@ -142,55 +137,63 @@ public class TotalCluster {
     public void clusterMove() {
         if (moveStatus == ClusterMoveStatus.Right) {
             rightMove();
-            if (right >= GUItil.getBounds().width) {
+            if (right >= uavNetwork.width && bottom >= uavNetwork.height) {
+                moveStatus = ClusterMoveStatus.Stop;
+            } else if (right >= uavNetwork.width) {
+                lastMoveStatus = ClusterMoveStatus.Right;
                 moveStatus = ClusterMoveStatus.Down;
             }
         } else if (moveStatus == ClusterMoveStatus.Down) {
             downMove();
             if (topology == Topology.Grid) {
-                if (bottom >= 1300 && right < GUItil.getBounds().width) {
-                    moveStatus = ClusterMoveStatus.Right;
-                } else if (bottom >= 850 && left > 0) {
+                if (((bottom <= uavNetwork.uavHeight * 9 * 2.5 && bottom >= uavNetwork.uavHeight * 9 * 2) || bottom >= uavNetwork.height) && lastMoveStatus == ClusterMoveStatus.Right) {
+                    lastMoveStatus = ClusterMoveStatus.Down;
                     moveStatus = ClusterMoveStatus.Left;
+                } else if ((bottom >= uavNetwork.uavHeight * 9 * 3 || bottom >= uavNetwork.height) && lastMoveStatus == ClusterMoveStatus.Left) {
+                    moveStatus = ClusterMoveStatus.Right;
+                    lastMoveStatus = ClusterMoveStatus.Down;
                 }
             } else if (topology == Topology.Line) {
-                if (bottom >= 1150 && right < GUItil.getBounds().width) {
-                    moveStatus = ClusterMoveStatus.Right;
-                } else if (bottom >= 770 && left > 0) {
+                if (((bottom <= uavNetwork.uavHeight * 8 * 2.5 && bottom >= uavNetwork.uavHeight * 8 * 2) || bottom >= uavNetwork.height) && lastMoveStatus == ClusterMoveStatus.Right) {
+                    lastMoveStatus = ClusterMoveStatus.Down;
                     moveStatus = ClusterMoveStatus.Left;
+                } else if ((bottom >= uavNetwork.uavHeight * 8 * 3 || bottom >= uavNetwork.height) && lastMoveStatus == ClusterMoveStatus.Left) {
+                    moveStatus = ClusterMoveStatus.Right;
+                    lastMoveStatus = ClusterMoveStatus.Down;
                 }
             }
 
         } else if (moveStatus == ClusterMoveStatus.Left) {
             leftMove();
-            if (left <= 0) {
+            if (left<=0 && bottom >= uavNetwork.height) {
+                moveStatus = ClusterMoveStatus.Stop;
+            }
+            else if(left <= 0) {
+                lastMoveStatus = ClusterMoveStatus.Left;
                 moveStatus = ClusterMoveStatus.Down;
             }
+        } else if (moveStatus == ClusterMoveStatus.Stop) {
+            System.out.println("巡航仿真结束");
         }
     }
 
 
     public void drawCloud() {
         int lefts, rights, tops, bottoms;
-        lefts = left/areaWidth;
-        rights= right/areaWidth;
-        tops = top/areaHeight;
-        bottoms = bottom/areaHeight;
-        for(int i=tops;i<=bottoms;i++){
-            for(int j=lefts;j<=rights;j++){
-                int index = i*26+j;
-                try{
+        lefts = left / uavNetwork.areaWidth;
+        rights = right / uavNetwork.areaWidth;
+        tops = top / uavNetwork.areaHeight;
+        bottoms = bottom / uavNetwork.areaHeight;
+        for (int i = tops; i <= bottoms; i++) {
+            for (int j = lefts; j <= rights; j++) {
+                int index = i * 26 + j;
+                try {
                     uavNetwork.cloudDraws.get(index).image = ImageRead.cloudBlue;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
             }
-
         }
-
-
-
     }
-
 }
