@@ -35,8 +35,10 @@ public class NotificationForm {
     private JButton 切换拓扑Button;
     private JButton 弹性重构巡航Button;
 
-    private PlaneWars pw;
+    public PlaneWars pw;
+    public int current = 0;
 
+    public int reButton = 0;
 
     public NotificationForm(PlaneWars pw) {
         this.pw = pw;
@@ -50,10 +52,11 @@ public class NotificationForm {
         随机拓扑生成Button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                current = 1;
                 Rectangle bounds = pw.getBounds();
                 pw.setNetwork(new UAVNetwork(64));
                 pw.setSize(bounds.width, bounds.height);
-                pw.topologyStatus = Topology.Grid;
+                pw.topologyStatus = Topology.Random;
                 pw.uavNetwork.status = SimulationStatus.FindCluster;
                 pw.initThread();
             }
@@ -62,6 +65,7 @@ public class NotificationForm {
         格状网络拓扑Button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                current = 2;
                 Rectangle bounds = pw.getBounds();
                 pw.setNetwork(new UAVNetwork(64));
                 pw.setSize(bounds.width, bounds.height);
@@ -74,6 +78,7 @@ public class NotificationForm {
         球状网络拓扑Button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                current = 3;
                 Rectangle bounds = pw.getBounds();
                 pw.setNetwork(new UAVNetwork(64));
                 pw.setSize(bounds.width, bounds.height);
@@ -86,6 +91,7 @@ public class NotificationForm {
         链状网络拓扑Button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                current = 4;
                 Rectangle bounds = pw.getBounds();
                 pw.setNetwork(new UAVNetwork(64));
                 pw.setSize(bounds.width, bounds.height);
@@ -119,6 +125,7 @@ public class NotificationForm {
              */
             @Override
             public void mouseClicked(MouseEvent e) {
+                current = 5;
                 JPopupMenu pop = new JPopupMenu();//你的弹出菜单
                 JMenuItem menu1 = new JMenuItem("格状->球状");
                 JMenuItem menu2 = new JMenuItem("球状->格状");
@@ -231,6 +238,7 @@ public class NotificationForm {
                 menu1.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        current = 6;
                         Rectangle bounds = pw.getBounds();
                         pw.setNetwork(new UAVNetwork(64));
                         pw.setSize(bounds.width, bounds.height);
@@ -243,6 +251,7 @@ public class NotificationForm {
                 menu2.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        current = 7;
                         Rectangle bounds = pw.getBounds();
                         pw.setNetwork(new UAVNetwork(64));
                         pw.setSize(bounds.width, bounds.height);
@@ -255,6 +264,7 @@ public class NotificationForm {
                 menu3.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        current = 8;
                         Rectangle bounds = pw.getBounds();
                         pw.setNetwork(new UAVNetwork(64));
                         pw.setSize(bounds.width, bounds.height);
@@ -282,43 +292,45 @@ public class NotificationForm {
                 JMenuItem menu1 = new JMenuItem("格状拓扑弹性重构巡航");
                 JMenuItem menu2 = new JMenuItem("球状拓扑弹性重构巡航");
                 JMenuItem menu3 = new JMenuItem("链状拓扑弹性重构巡航");
-
                 menu1.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        reButton = 1;
                         Rectangle bounds = pw.getBounds();
                         pw.setNetwork(new UAVNetwork(51));
                         pw.uavNetwork.setClusterMemberNumber(6);
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Grid;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
-                        pw.initThreads();
+                        pw.reInitThreads();
                     }
                 });
 
                 menu2.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        reButton = 2;
                         Rectangle bounds = pw.getBounds();
                         pw.setNetwork(new UAVNetwork(51));
                         pw.uavNetwork.setClusterMemberNumber(6);
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Circle;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
-                        pw.initThreads();
+                        pw.reInitThreads();
                     }
                 });
 
                 menu3.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        reButton = 3;
                         Rectangle bounds = pw.getBounds();
                         pw.setNetwork(new UAVNetwork(51));
                         pw.uavNetwork.setClusterMemberNumber(6);
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Line;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
-                        pw.initThreads();
+                        pw.reInitThreads();
                     }
                 });
                 pop.add(menu1);
@@ -327,7 +339,6 @@ public class NotificationForm {
                 pop.show(弹性重构巡航Button, e.getX(), e.getY());
             }
         });
-
     }
 
     public JPanel getPanel1() {

@@ -161,6 +161,14 @@ public class TotalCluster {
                     moveStatus = ClusterMoveStatus.Right;
                     lastMoveStatus = ClusterMoveStatus.Down;
                 }
+            }else if (topology == Topology.Circle) {
+                if (((bottom <= uavNetwork.uavHeight * 9.5 * 2.5 && bottom >= uavNetwork.uavHeight * 9.5 * 2) || bottom >= uavNetwork.height) && lastMoveStatus == ClusterMoveStatus.Right) {
+                    lastMoveStatus = ClusterMoveStatus.Down;
+                    moveStatus = ClusterMoveStatus.Left;
+                } else if ((bottom >= uavNetwork.uavHeight * 9.5 * 3 || bottom >= uavNetwork.height) && lastMoveStatus == ClusterMoveStatus.Left) {
+                    moveStatus = ClusterMoveStatus.Right;
+                    lastMoveStatus = ClusterMoveStatus.Down;
+                }
             }
 
         } else if (moveStatus == ClusterMoveStatus.Left) {

@@ -353,8 +353,8 @@ public class UAV extends Thread {
                     position_index_x = head.position_index_x + (position + 1) * lineDistance;
                     position_index_y = head.position_index_y;
                 } else {
-                    position_index_x = position_index_x + (head.position_index_x + lineDistance - position_index_x) / moveSpeed;
-                    position_index_y = position_index_y + (head.position_index_y - lineDistance - position_index_y) / moveSpeed;
+                    position_index_x = position_index_x + (head.position_index_x + (position + 1) *lineDistance - position_index_x) / moveSpeed;
+                    position_index_y = position_index_y + (head.position_index_y + lineDistance - position_index_y) / moveSpeed;
                 }
             }
         }
@@ -521,19 +521,19 @@ public class UAV extends Thread {
      */
     public void drawUAVs(Graphics g) {
         g.drawImage(UAV_image, position_index_x, position_index_y, UAV_Height, UAV_Width, null);
-        if (this.cluster != null) {
-            if (uavNetwork.status.equals(SimulationStatus.FindCluster) || uavNetwork.status.equals(SimulationStatus.Route)) {
-                g.drawOval(position_index_x + UAV_Height / 2 - GUItil.getBounds().height / 2, position_index_y + UAV_Width / 2 - GUItil.getBounds().height / 2, 2 * Cluster.clusterRadius, 2 * Cluster.clusterRadius);
-            }
-        }
-        if (countNumber > 0) {
-            showReceivePacket(g);
-            countNumber--;
-            if (countNumber < 0) {
-                this.routeList.clear();
-                countNumber = 0;
-            }
-        }
+//        if (this.cluster != null) {
+//            if (uavNetwork.status.equals(SimulationStatus.FindCluster) || uavNetwork.status.equals(SimulationStatus.Route)) {
+//                g.drawOval(position_index_x + UAV_Height / 2 - GUItil.getBounds().height / 2, position_index_y + UAV_Width / 2 - GUItil.getBounds().height / 2, 2 * Cluster.clusterRadius, 2 * Cluster.clusterRadius);
+//            }
+//        }
+//        if (countNumber > 0) {
+//            showReceivePacket(g);
+//            countNumber--;
+//            if (countNumber < 0) {
+//                this.routeList.clear();
+//                countNumber = 0;
+//            }
+//        }
     }
 
     public void showReceivePacket(Graphics g) {

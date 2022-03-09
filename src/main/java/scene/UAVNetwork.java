@@ -120,8 +120,8 @@ public class UAVNetwork {
             iterator.next().move(topologyStatus);
         }
         if (topologyStatus == Topology.Grid) {
-            if (gridCount <= 600) gridCount++;
-            if (gridCount >= 600) {
+            if (gridCount <= 550) gridCount++;
+            if (gridCount >= 550) {
                 status = SimulationStatus.Cruise;
             } else if (gridCount > 450) {
                 status = SimulationStatus.ForCruise;
@@ -129,8 +129,8 @@ public class UAVNetwork {
             }
         }
         if (topologyStatus == Topology.Line) {
-            if (lineCount <= 600) lineCount++;
-            if (lineCount >= 600) {
+            if (lineCount <= 550) lineCount++;
+            if (lineCount >= 550) {
                 status = SimulationStatus.Cruise;
             } else if (lineCount > 450) {
                 status = SimulationStatus.ForCruise;
@@ -138,8 +138,8 @@ public class UAVNetwork {
             }
         }
         if (topologyStatus == Topology.Circle) {
-            if (circleCount <= 600) circleCount++;
-            if (circleCount >= 600) {
+            if (circleCount <= 550) circleCount++;
+            if (circleCount >= 550) {
                 status = SimulationStatus.Cruise;
             } else if (circleCount > 450) {
                 status = SimulationStatus.ForCruise;

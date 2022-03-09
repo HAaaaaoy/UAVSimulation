@@ -23,7 +23,7 @@ public class MainFrame extends JFrame {
         //加载JTree
         dataBox.load();
         notificationForm = new NotificationForm(pw);
-        controlPanel = new ControlPanel();
+        controlPanel = new ControlPanel(notificationForm);
 //        JPanel panel1 = topoForm.getJpanel();
         JPanel panel2 = dataBox.getPanel();
         JPanel panel3 = notificationForm.getPanel1();

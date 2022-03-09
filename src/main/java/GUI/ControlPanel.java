@@ -1,12 +1,15 @@
 package GUI;
 
+import Curve.XYLineChart_AWT;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import org.jfree.ui.RefineryUtilities;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.HashMap;
 
 public class ControlPanel {
     private JPanel panel;
@@ -28,8 +31,17 @@ public class ControlPanel {
     private JRadioButton 常规恢复RadioButton;
     private JTabbedPane tabbedPane1;
     private JTabbedPane tabbedPane2;
+    private JButton 编队时间比较Button;
+    private JButton 巡航状态Button;
+    private JButton 重构时间Button;
+    private JButton 巡航状态对比Button;
 
-    public ControlPanel() {
+
+    private NotificationForm notificationForm;
+
+    public ControlPanel(NotificationForm notificationForm) {
+        this.notificationForm = notificationForm;
+
         面积textField1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -75,13 +87,134 @@ public class ControlPanel {
         网络生成时间图Button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
+                int selectedIndex = notificationForm.current;
+                if (selectedIndex == 1) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("连通节点图", "连通节点图", "连通节点数", "组网时间/ms", "随机拓扑", notificationForm.pw.randomMeshTime);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                } else if (selectedIndex == 2) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("连通节点图", "连通节点图", "连通节点数", "组网时间/ms", "格状网络拓扑", notificationForm.pw.gridMeshTime);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                } else if (selectedIndex == 3) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("连通节点图", "连通节点图", "连通节点数", "组网时间/ms", "球状网络拓扑", notificationForm.pw.circleMeshTime);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                } else if (selectedIndex == 4) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("连通节点图", "连通节点图", "连通节点数", "组网时间/ms", "链状网络拓扑", notificationForm.pw.lineMeshTime);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                }
             }
         });
         连通节点图Button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
+                int selectedIndex = notificationForm.current;
+                if (selectedIndex == 2) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "编队完成度%", "编队时间/ms", "格状网络拓扑", notificationForm.pw.formationGridTime);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                } else if (selectedIndex == 3) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "编队完成度%", "编队时间/ms", "球状网络拓扑", notificationForm.pw.formationCircleTime);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                } else if (selectedIndex == 4) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "编队完成度%", "编队时间/ms", "链状网络拓扑", notificationForm.pw.formationLineTime);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                } else if (selectedIndex == 5) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "编队完成度%", "编队时间/ms", "拓扑切换", notificationForm.pw.formationTransferTime);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                } else {
+
+                }
+            }
+        });
+
+        编队时间比较Button.addMouseListener(new MouseAdapter() {
+            /**
+             * {@inheritDoc}
+             *
+             * @param e
+             */
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "编队完成度%", "编队时间/ms", "格状拓扑", "球状拓扑","链状拓扑",notificationForm.pw.formationGridTime,notificationForm.pw.formationCircleTime,notificationForm.pw.formationLineTime);
+                chart.pack();
+                RefineryUtilities.centerFrameOnScreen(chart);
+                chart.setVisible(true);
+            }
+        });
+
+        巡航状态Button.addMouseListener(new MouseAdapter() {
+            /**
+             * {@inheritDoc}
+             *
+             * @param e
+             */
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int selectedIndex = notificationForm.current;
+                if (selectedIndex == 6) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "格状网络拓扑", notificationForm.pw.cruiseTime, true);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                } else if (selectedIndex == 7) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "球状网络拓扑", notificationForm.pw.cruiseTime, true);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                } else if (selectedIndex == 8) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "链状网络拓扑", notificationForm.pw.cruiseTime, true);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                }
+            }
+        });
+
+        重构时间Button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                XYLineChart_AWT chart = new XYLineChart_AWT("重构状态图", "重构状态图", "重构完成度%", "重构时间/ms", "拓扑切换", notificationForm.pw.reTime);
+                chart.pack();
+                RefineryUtilities.centerFrameOnScreen(chart);
+                chart.setVisible(true);
+            }
+        });
+
+        巡航状态对比Button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int selectedIndex = notificationForm.current;
+                int re = notificationForm.reButton;
+                if (selectedIndex == 6 && re==1) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "格状网络拓扑","重构格状网络拓扑", notificationForm.pw.cruiseTime, notificationForm.pw.reCruiseTime);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                } else if (selectedIndex == 7 && re==2) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "球状网络拓扑","重构球状网络拓扑", notificationForm.pw.cruiseTime, notificationForm.pw.reCruiseTime );
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                } else if (selectedIndex == 8 && re==3) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "链状网络拓扑","重构链状网络拓扑",notificationForm.pw.cruiseTime, notificationForm.pw.reCruiseTime);
+                    chart.pack();
+                    RefineryUtilities.centerFrameOnScreen(chart);
+                    chart.setVisible(true);
+                }
             }
         });
     }
@@ -90,13 +223,6 @@ public class ControlPanel {
         // TODO: place custom component creation code here
     }
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("ControlPanel");
-        frame.setContentPane(new ControlPanel().panel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
-    }
 
     public JPanel getPanel() {
         return panel;

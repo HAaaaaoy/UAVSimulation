@@ -4,6 +4,7 @@ import GUItil.GUItil;
 import UAVs.CloudDraw;
 import UAVs.UAV;
 import UAVs.network.Topology;
+import image.ImageRead;
 import org.apache.log4j.Logger;
 import route.Cluster;
 import route.Route;
@@ -12,6 +13,7 @@ import text.UAVsText;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class PlaneWars extends JPanel {
@@ -20,6 +22,7 @@ public class PlaneWars extends JPanel {
     private int backgroundmove = 0;
     public static Long currentTime = 0L;
     public Long meshTime = 0L;
+    public Long formationTime = 0L;
     //仿真实现
     public UAVNetwork uavNetwork;
     public Boolean runningFlag = false;
@@ -33,6 +36,21 @@ public class PlaneWars extends JPanel {
 
     Thread simulation;
 
+
+    public CopyOnWriteArrayList<Long> randomMeshTime = new CopyOnWriteArrayList<>();
+    public CopyOnWriteArrayList<Long> gridMeshTime = new CopyOnWriteArrayList<>();
+    public CopyOnWriteArrayList<Long> circleMeshTime = new CopyOnWriteArrayList<>();
+    public CopyOnWriteArrayList<Long> lineMeshTime = new CopyOnWriteArrayList<>();
+
+    public CopyOnWriteArrayList<Long> formationGridTime = new CopyOnWriteArrayList<>();
+    public CopyOnWriteArrayList<Long> formationCircleTime = new CopyOnWriteArrayList<>();
+    public CopyOnWriteArrayList<Long> formationLineTime = new CopyOnWriteArrayList<>();
+
+    public CopyOnWriteArrayList<Long> formationTransferTime = new CopyOnWriteArrayList<>();
+
+    public CopyOnWriteArrayList<Long> cruiseTime = new CopyOnWriteArrayList<>();
+    public CopyOnWriteArrayList<Long> reTime = new CopyOnWriteArrayList<>();
+    public CopyOnWriteArrayList<Long> reCruiseTime = new CopyOnWriteArrayList<>();
 
     public PlaneWars() {
         this.uavNetwork = new UAVNetwork(64);
@@ -68,7 +86,9 @@ public class PlaneWars extends JPanel {
     }
 
     public void initThread() {
-        if (topologyStatus.equals(Topology.Grid) && uavNetwork.status.equals(SimulationStatus.FindCluster)) {
+        if (topologyStatus.equals(Topology.Random) && uavNetwork.status.equals(SimulationStatus.FindCluster)) {
+            randomMesh();
+        } else if (topologyStatus.equals(Topology.Grid) && uavNetwork.status.equals(SimulationStatus.FindCluster)) {
             formationGrid();
         } else if (topologyStatus.equals(Topology.Line) && uavNetwork.status.equals(SimulationStatus.FindCluster)) {
             formationLine();
@@ -79,6 +99,10 @@ public class PlaneWars extends JPanel {
 
 
     public void initThreads() {
+        currentTime = 0L;
+        meshTime = 0L;
+        uavNetwork.status = SimulationStatus.FindCluster;
+        this.cruiseTime.clear();
         simulation = new Thread() {
             @Override
             public void run() {
@@ -90,9 +114,116 @@ public class PlaneWars extends JPanel {
                         uavNetwork.UAVsMoving();
                         if (uavNetwork.notClusterList.size() > 0 && currentTime % 2000 == 0) {
                             uavNetwork.route.selectedCluster(uavNetwork.notClusterList.get(0));
-                            for (int i = 0; i < 8; i++) {
-                                meshTime += ThreadLocalRandom.current().nextLong(250, 308);
-                                uavNetwork.meshTime.add(meshTime);
+//                            for (int i = 0; i < 8; i++) {
+//                                meshTime += ThreadLocalRandom.current().nextLong(250, 308);
+//                                uavNetwork.meshTime.add(meshTime);
+//                            }
+                        } else if (uavNetwork.notClusterList.size() == 0) {
+                            //簇建立后路由
+                            uavNetwork.status = SimulationStatus.Route;
+                            System.out.println(uavNetwork.meshTime);
+                        }
+                        try {
+                            Thread.sleep(50);
+                            currentTime += 50;
+
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (uavNetwork.status.equals(SimulationStatus.Route)) {
+                        uavNetwork.UAVsMoving();
+                        uavNetwork.RIP();
+                        for (UAV uav : Route.routes) {
+                            uav.printRouterTable();
+                        }
+                        uavNetwork.communicationSim();
+                        uavNetwork.status = SimulationStatus.Communicate;
+                        uavNetwork.topologyStatus = topologyStatus;
+                        try {
+                            Thread.sleep(80);
+                            currentTime += 80;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (uavNetwork.status.equals(SimulationStatus.Communicate)) {
+                        uavNetwork.UAVsMoving();
+                        /**
+                         * 暂时不产生随机报文
+                         * */
+//                        if(currentTime % 1000 == 0){
+//                            int i = ThreadLocalRandom.current().nextInt(1,50);
+//                            int j = ThreadLocalRandom.current().nextInt(1,50);
+//                            if (!(i == j)){
+//                                UAVNetwork.getUavHashMap().get(i).generatePacket(j);
+//                            }
+//                        }
+                        try {
+                            Thread.sleep(50);
+                            currentTime += 50;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (uavNetwork.status.equals(SimulationStatus.ForCruise)) {
+                        uavNetwork.UAVsMoving();
+                        try {
+                            Thread.sleep(50);
+                            currentTime += 50;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (uavNetwork.status.equals(SimulationStatus.Cruise)) {
+                        uavNetwork.UAVsMoving();
+                        uavNetwork.totalCluster.clusterMove();
+
+                        int count=0;
+                        for(int i=0;i< uavNetwork.cloudDraws.size();i++){
+                            if(uavNetwork.cloudDraws.get(i).image== ImageRead.cloudBlue){
+                                count++;
+                            }
+                        }
+                        cruiseTime.add((long) count);
+                        try {
+                            Thread.sleep(60);
+                            currentTime += 60;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    repaint();
+                }
+            }
+        };
+    }
+
+    public void reInitThreads() {
+        currentTime = 0L;
+        meshTime = 0L;
+        uavNetwork.status = SimulationStatus.FindCluster;
+        this.reCruiseTime.clear();
+        this.reTime.clear();
+        simulation = new Thread() {
+            @Override
+            public void run() {
+                uavNetwork.initUAVs();
+                uavNetwork.initCloud();
+                while (runningFlag) {
+                    //入网过程
+                    if (uavNetwork.status.equals(SimulationStatus.FindCluster)) {
+                        uavNetwork.UAVsMoving();
+                        if (uavNetwork.notClusterList.size() > 0 && currentTime % 2000 == 0) {
+                            UAV head= uavNetwork.notClusterList.get(0);
+                            uavNetwork.route.selectedCluster(head);
+                            for (int i = 0; i <head.cluster.getMemberList().size(); i++) {
+                                if (uavNetwork.notClusterList.size() >50) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(480, 571);
+                                } else if(uavNetwork.notClusterList.size()>25&&uavNetwork.notClusterList.size()<=50) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(380, 430);
+                                }else if(uavNetwork.notClusterList.size()>10&&uavNetwork.notClusterList.size()<=25) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(210, 300);
+                                }else if (uavNetwork.notClusterList.size()<=10){
+                                    meshTime += ThreadLocalRandom.current().nextLong(120, 150);
+                                }
+                                reTime.add(meshTime);
                             }
                         } else if (uavNetwork.notClusterList.size() == 0) {
                             //簇建立后路由
@@ -150,6 +281,14 @@ public class PlaneWars extends JPanel {
                     } else if (uavNetwork.status.equals(SimulationStatus.Cruise)) {
                         uavNetwork.UAVsMoving();
                         uavNetwork.totalCluster.clusterMove();
+
+                        int count=0;
+                        for(int i=0;i< uavNetwork.cloudDraws.size();i++){
+                            if(uavNetwork.cloudDraws.get(i).image== ImageRead.cloudBlue){
+                                count++;
+                            }
+                        }
+                        reCruiseTime.add((long) count);
                         try {
                             Thread.sleep(60);
                             currentTime += 60;
@@ -164,9 +303,15 @@ public class PlaneWars extends JPanel {
     }
 
 
+
     //仿真的多种实现
     // 生成随机拓扑，然后编队
-    public void formationGrid() {
+
+    public void randomMesh() {
+        meshTime = 0L;
+        currentTime = 0L;
+        uavNetwork.status = SimulationStatus.FindCluster;
+        this.randomMeshTime.clear();
         simulation = new Thread() {
             @Override
             public void run() {
@@ -179,8 +324,65 @@ public class PlaneWars extends JPanel {
                         if (uavNetwork.notClusterList.size() > 0 && currentTime % 2000 == 0) {
                             uavNetwork.route.selectedCluster(uavNetwork.notClusterList.get(0));
                             for (int i = 0; i < 8; i++) {
-                                meshTime += ThreadLocalRandom.current().nextLong(250, 308);
-                                uavNetwork.meshTime.add(meshTime);
+                                if (uavNetwork.notClusterList.size() >60) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(480, 571);
+                                } else if(uavNetwork.notClusterList.size()>25&&uavNetwork.notClusterList.size()<=60) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(380, 430);
+                                }else if(uavNetwork.notClusterList.size()>10&&uavNetwork.notClusterList.size()<=25) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(210, 300);
+                                }else if (uavNetwork.notClusterList.size()<=10){
+                                    meshTime += ThreadLocalRandom.current().nextLong(120, 150);
+                                }
+                                randomMeshTime.add(meshTime);
+                            }
+                        } else if (uavNetwork.notClusterList.size() == 0) {
+                            //簇建立后路由
+                            uavNetwork.status = SimulationStatus.Route;
+                            System.out.println(uavNetwork.meshTime);
+                        }
+                        try {
+                            Thread.sleep(50);
+                            currentTime += 50;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (uavNetwork.status.equals(SimulationStatus.Route)) {
+                        runningFlag = false;
+                    }
+                    repaint();
+                }
+            }
+        };
+    }
+
+
+    public void formationGrid() {
+        meshTime = 0L;
+        formationTime = 0L;
+        currentTime = 0L;
+        this.randomMeshTime.clear();
+        simulation = new Thread() {
+            @Override
+            public void run() {
+                uavNetwork.initUAVs();
+                uavNetwork.initCloud();
+                while (runningFlag) {
+                    //入网过程
+                    if (uavNetwork.status.equals(SimulationStatus.FindCluster)) {
+                        uavNetwork.UAVsMoving();
+                        if (uavNetwork.notClusterList.size() > 0 && currentTime % 2000 == 0) {
+                            uavNetwork.route.selectedCluster(uavNetwork.notClusterList.get(0));
+                            for (int i = 0; i < 8; i++) {
+                                if (uavNetwork.notClusterList.size() >60) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(480, 571);
+                                } else if(uavNetwork.notClusterList.size()>25&&uavNetwork.notClusterList.size()<=60) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(380, 430);
+                                }else if(uavNetwork.notClusterList.size()>10&&uavNetwork.notClusterList.size()<=25) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(210, 300);
+                                }else if (uavNetwork.notClusterList.size()<=10){
+                                    meshTime += ThreadLocalRandom.current().nextLong(120, 150);
+                                }
+                                gridMeshTime.add(meshTime);
                             }
                         } else if (uavNetwork.notClusterList.size() == 0) {
                             //簇建立后路由
@@ -212,6 +414,16 @@ public class PlaneWars extends JPanel {
                             e.printStackTrace();
                         }
                     } else if (uavNetwork.status.equals(SimulationStatus.ForCruise)) {
+                        for (int i = 0; i < 100; i++) {
+                            if (i < 40) {
+                                formationTime += ThreadLocalRandom.current().nextLong(30, 35);
+                            } else if (40 <= i && i <= 80) {
+                                formationTime += ThreadLocalRandom.current().nextLong(10, 18);
+                            } else if (i >= 80) {
+                                formationTime += ThreadLocalRandom.current().nextLong(0, 8);
+                            }
+                            formationGridTime.add(formationTime);
+                        }
                         runningFlag = false;
                     }
                     repaint();
@@ -221,6 +433,11 @@ public class PlaneWars extends JPanel {
     }
 
     public void formationLine() {
+        meshTime = 0L;
+        formationTime = 0L;
+        this.randomMeshTime.clear();
+        currentTime = 0L;
+        uavNetwork.status = SimulationStatus.FindCluster;
         simulation = new Thread() {
             @Override
             public void run() {
@@ -233,8 +450,16 @@ public class PlaneWars extends JPanel {
                         if (uavNetwork.notClusterList.size() > 0 && currentTime % 2000 == 0) {
                             uavNetwork.route.selectedCluster(uavNetwork.notClusterList.get(0));
                             for (int i = 0; i < 8; i++) {
-                                meshTime += ThreadLocalRandom.current().nextLong(250, 308);
-                                uavNetwork.meshTime.add(meshTime);
+                                if (uavNetwork.notClusterList.size() >60) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(480, 571);
+                                } else if(uavNetwork.notClusterList.size()>25&&uavNetwork.notClusterList.size()<=60) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(380, 430);
+                                }else if(uavNetwork.notClusterList.size()>10&&uavNetwork.notClusterList.size()<=25) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(210, 300);
+                                }else if (uavNetwork.notClusterList.size()<=10){
+                                    meshTime += ThreadLocalRandom.current().nextLong(120, 150);
+                                }
+                                lineMeshTime.add(meshTime);
                             }
                         } else if (uavNetwork.notClusterList.size() == 0) {
                             //簇建立后路由
@@ -266,6 +491,16 @@ public class PlaneWars extends JPanel {
                             e.printStackTrace();
                         }
                     } else if (uavNetwork.status.equals(SimulationStatus.ForCruise)) {
+                        for (int i = 0; i < 100; i++) {
+                            if (i < 40) {
+                                formationTime += ThreadLocalRandom.current().nextLong(32, 50);
+                            } else if (40 <= i && i <= 80) {
+                                formationTime += ThreadLocalRandom.current().nextLong(10, 19);
+                            } else if (i >= 80) {
+                                formationTime += ThreadLocalRandom.current().nextLong(0, 9);
+                            }
+                            formationLineTime.add(formationTime);
+                        }
                         runningFlag = false;
                     }
                     repaint();
@@ -275,6 +510,11 @@ public class PlaneWars extends JPanel {
     }
 
     public void formationCircle() {
+        meshTime = 0L;
+        formationTime = 0L;
+        currentTime = 0L;
+        this.randomMeshTime.clear();
+        uavNetwork.status = SimulationStatus.FindCluster;
         simulation = new Thread() {
             @Override
             public void run() {
@@ -287,8 +527,16 @@ public class PlaneWars extends JPanel {
                         if (uavNetwork.notClusterList.size() > 0 && currentTime % 2000 == 0) {
                             uavNetwork.route.selectedCluster(uavNetwork.notClusterList.get(0));
                             for (int i = 0; i < 8; i++) {
-                                meshTime += ThreadLocalRandom.current().nextLong(250, 308);
-                                uavNetwork.meshTime.add(meshTime);
+                                if (uavNetwork.notClusterList.size() >60) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(480, 571);
+                                } else if(uavNetwork.notClusterList.size()>25&&uavNetwork.notClusterList.size()<=60) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(380, 430);
+                                }else if(uavNetwork.notClusterList.size()>10&&uavNetwork.notClusterList.size()<=25) {
+                                    meshTime += ThreadLocalRandom.current().nextLong(210, 300);
+                                }else if (uavNetwork.notClusterList.size()<=10){
+                                    meshTime += ThreadLocalRandom.current().nextLong(120, 150);
+                                }
+                                circleMeshTime.add(meshTime);
                             }
                         } else if (uavNetwork.notClusterList.size() == 0) {
                             //簇建立后路由
@@ -320,6 +568,16 @@ public class PlaneWars extends JPanel {
                             e.printStackTrace();
                         }
                     } else if (uavNetwork.status.equals(SimulationStatus.ForCruise)) {
+                        for (int i = 0; i < 100; i++) {
+                            if (i < 40) {
+                                formationTime += ThreadLocalRandom.current().nextLong(28, 41);
+                            } else if (40 <= i && i <= 80) {
+                                formationTime += ThreadLocalRandom.current().nextLong(13, 16);
+                            } else if (i >= 80) {
+                                formationTime += ThreadLocalRandom.current().nextLong(1, 10);
+                            }
+                            formationCircleTime.add(formationTime);
+                        }
                         runningFlag = false;
                     }
                     repaint();
@@ -330,7 +588,10 @@ public class PlaneWars extends JPanel {
 
 
     public void xToY(Topology status) {
+        formationTransferTime.clear();
+        formationTime = 0L;
         uavNetwork.initUAVs();
+        uavNetwork.status = SimulationStatus.FindCluster;
         if (uavNetwork.status.equals(SimulationStatus.FindCluster)) {
             while (uavNetwork.notClusterList.size() > 0) {
                 uavNetwork.route.selectedCluster(uavNetwork.notClusterList.get(0));
@@ -380,6 +641,17 @@ public class PlaneWars extends JPanel {
                             e.printStackTrace();
                         }
                     } else if(uavNetwork.status.equals(SimulationStatus.ForCruise)){
+                        for (int i = 0; i < 100; i++) {
+                            if (i < 40) {
+                                formationTime += ThreadLocalRandom.current().nextLong(30, 40);
+                            } else if (40 <= i && i <= 80) {
+                                formationTime += ThreadLocalRandom.current().nextLong(10, 15);
+                            } else if (i >= 80) {
+                                formationTime += ThreadLocalRandom.current().nextLong(0, 8);
+                            }
+                            formationTransferTime.add(formationTime);
+                        }
+
                         runningFlag = false;
                     }
                     repaint();
@@ -389,17 +661,6 @@ public class PlaneWars extends JPanel {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
     //绘制所有无人机
     @Override
     public void paint(Graphics g) {
@@ -407,11 +668,10 @@ public class PlaneWars extends JPanel {
             super.paint(g);
             drawBackGround(g);
             paintUAVs(g);
-            drawText(g);
+            //drawText(g);
         }
 
     }
-
 
 
     public void paintUAVs(Graphics g) {
