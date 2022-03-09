@@ -521,11 +521,11 @@ public class UAV extends Thread {
      */
     public void drawUAVs(Graphics g) {
         g.drawImage(UAV_image, position_index_x, position_index_y, UAV_Height, UAV_Width, null);
-//        if (this.cluster != null) {
-//            if (uavNetwork.status.equals(SimulationStatus.FindCluster) || uavNetwork.status.equals(SimulationStatus.Route)) {
-//                g.drawOval(position_index_x + UAV_Height / 2 - GUItil.getBounds().height / 2, position_index_y + UAV_Width / 2 - GUItil.getBounds().height / 2, 2 * Cluster.clusterRadius, 2 * Cluster.clusterRadius);
-//            }
-//        }
+        if (this.cluster != null) {
+            if (uavNetwork.status.equals(SimulationStatus.FindCluster) || uavNetwork.status.equals(SimulationStatus.Route)) {
+                g.drawOval(position_index_x + UAV_Height / 2 - 750, position_index_y + UAV_Width / 2 - 750, 2 * 750, 2 * 750);
+            }
+        }
 //        if (countNumber > 0) {
 //            showReceivePacket(g);
 //            countNumber--;

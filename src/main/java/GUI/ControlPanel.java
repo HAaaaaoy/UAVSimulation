@@ -1,5 +1,6 @@
 package GUI;
 
+import Curve.TwoTimeChart;
 import Curve.XYLineChart_AWT;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -20,7 +21,6 @@ public class ControlPanel {
     private JCheckBox 备份CheckBox;
     private JRadioButton 编队飞行RadioButton;
     private JRadioButton 智能恢复RadioButton;
-    private JButton 开始仿真Button;
     private JSlider 线程速度slider1;
     private JTextField 个数textField2;
     private JTextField 速度textField3;
@@ -72,12 +72,6 @@ public class ControlPanel {
                 super.componentMoved(e);
             }
         });
-        开始仿真Button.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-            }
-        });
         暂停Button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -89,22 +83,23 @@ public class ControlPanel {
             public void mouseClicked(MouseEvent e) {
                 int selectedIndex = notificationForm.current;
                 if (selectedIndex == 1) {
-                    XYLineChart_AWT chart = new XYLineChart_AWT("连通节点图", "连通节点图", "连通节点数", "组网时间/ms", "随机拓扑", notificationForm.pw.randomMeshTime);
+                    //XYLineChart_AWT chart = new XYLineChart_AWT("连通节点图", "连通节点图", "连通节点数", "组网时间/ms", "随机拓扑", notificationForm.pw.randomMeshTime);
+                    TwoTimeChart chart = new TwoTimeChart("连通节点图","连通节点图","随机拓扑", notificationForm.pw.randomMeshTime );
                     chart.pack();
                     RefineryUtilities.centerFrameOnScreen(chart);
                     chart.setVisible(true);
                 } else if (selectedIndex == 2) {
-                    XYLineChart_AWT chart = new XYLineChart_AWT("连通节点图", "连通节点图", "连通节点数", "组网时间/ms", "格状网络拓扑", notificationForm.pw.gridMeshTime);
+                    TwoTimeChart chart = new TwoTimeChart("连通节点图","连通节点图", "格状网络拓扑", notificationForm.pw.gridMeshTime);
                     chart.pack();
                     RefineryUtilities.centerFrameOnScreen(chart);
                     chart.setVisible(true);
                 } else if (selectedIndex == 3) {
-                    XYLineChart_AWT chart = new XYLineChart_AWT("连通节点图", "连通节点图", "连通节点数", "组网时间/ms", "球状网络拓扑", notificationForm.pw.circleMeshTime);
+                    TwoTimeChart chart = new TwoTimeChart("连通节点图","连通节点图","球状网络拓扑", notificationForm.pw.circleMeshTime);
                     chart.pack();
                     RefineryUtilities.centerFrameOnScreen(chart);
                     chart.setVisible(true);
                 } else if (selectedIndex == 4) {
-                    XYLineChart_AWT chart = new XYLineChart_AWT("连通节点图", "连通节点图", "连通节点数", "组网时间/ms", "链状网络拓扑", notificationForm.pw.lineMeshTime);
+                    TwoTimeChart chart = new TwoTimeChart("连通节点图","连通节点图","链状网络拓扑", notificationForm.pw.lineMeshTime);
                     chart.pack();
                     RefineryUtilities.centerFrameOnScreen(chart);
                     chart.setVisible(true);
@@ -340,9 +335,6 @@ public class ControlPanel {
         final JPanel panel5 = new JPanel();
         panel5.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel5, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        开始仿真Button = new JButton();
-        开始仿真Button.setText("开始仿真");
-        panel5.add(开始仿真Button, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         暂停Button = new JButton();
         暂停Button.setText("暂停仿真");
         panel5.add(暂停Button, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
