@@ -84,22 +84,22 @@ public class ControlPanel {
                 int selectedIndex = notificationForm.current;
                 if (selectedIndex == 1) {
                     //XYLineChart_AWT chart = new XYLineChart_AWT("连通节点图", "连通节点图", "连通节点数", "组网时间/ms", "随机拓扑", notificationForm.pw.randomMeshTime);
-                    TwoTimeChart chart = new TwoTimeChart("连通节点图","连通节点图","随机拓扑", notificationForm.pw.randomMeshTime );
+                    TwoTimeChart chart = new TwoTimeChart("连通节点图", "连通节点图", "随机拓扑", notificationForm.pw.randomMeshTime);
                     chart.pack();
                     RefineryUtilities.centerFrameOnScreen(chart);
                     chart.setVisible(true);
                 } else if (selectedIndex == 2) {
-                    TwoTimeChart chart = new TwoTimeChart("连通节点图","连通节点图", "格状网络拓扑", notificationForm.pw.gridMeshTime);
+                    TwoTimeChart chart = new TwoTimeChart("连通节点图", "连通节点图", "格状网络拓扑", notificationForm.pw.gridMeshTime);
                     chart.pack();
                     RefineryUtilities.centerFrameOnScreen(chart);
                     chart.setVisible(true);
                 } else if (selectedIndex == 3) {
-                    TwoTimeChart chart = new TwoTimeChart("连通节点图","连通节点图","球状网络拓扑", notificationForm.pw.circleMeshTime);
+                    TwoTimeChart chart = new TwoTimeChart("连通节点图", "连通节点图", "球状网络拓扑", notificationForm.pw.circleMeshTime);
                     chart.pack();
                     RefineryUtilities.centerFrameOnScreen(chart);
                     chart.setVisible(true);
                 } else if (selectedIndex == 4) {
-                    TwoTimeChart chart = new TwoTimeChart("连通节点图","连通节点图","链状网络拓扑", notificationForm.pw.lineMeshTime);
+                    TwoTimeChart chart = new TwoTimeChart("连通节点图", "连通节点图", "链状网络拓扑", notificationForm.pw.lineMeshTime);
                     chart.pack();
                     RefineryUtilities.centerFrameOnScreen(chart);
                     chart.setVisible(true);
@@ -144,7 +144,7 @@ public class ControlPanel {
              */
             @Override
             public void mouseClicked(MouseEvent e) {
-                XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "编队完成度%", "编队时间/ms", "格状拓扑", "球状拓扑","链状拓扑",notificationForm.pw.formationGridTime,notificationForm.pw.formationCircleTime,notificationForm.pw.formationLineTime);
+                XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "编队完成度%", "编队时间/ms", "格状拓扑", "球状拓扑", "链状拓扑", notificationForm.pw.formationGridTime, notificationForm.pw.formationCircleTime, notificationForm.pw.formationLineTime);
                 chart.pack();
                 RefineryUtilities.centerFrameOnScreen(chart);
                 chart.setVisible(true);
@@ -194,18 +194,18 @@ public class ControlPanel {
             public void mouseClicked(MouseEvent e) {
                 int selectedIndex = notificationForm.current;
                 int re = notificationForm.reButton;
-                if (selectedIndex == 6 && re==1) {
-                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "格状网络拓扑","重构格状网络拓扑", notificationForm.pw.cruiseTime, notificationForm.pw.reCruiseTime);
+                if (selectedIndex == 6 && re == 1) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "格状网络拓扑", "重构格状网络拓扑", notificationForm.pw.cruiseTime, notificationForm.pw.reCruiseTime);
                     chart.pack();
                     RefineryUtilities.centerFrameOnScreen(chart);
                     chart.setVisible(true);
-                } else if (selectedIndex == 7 && re==2) {
-                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "球状网络拓扑","重构球状网络拓扑", notificationForm.pw.cruiseTime, notificationForm.pw.reCruiseTime );
+                } else if (selectedIndex == 7 && re == 2) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "球状网络拓扑", "重构球状网络拓扑", notificationForm.pw.cruiseTime, notificationForm.pw.reCruiseTime);
                     chart.pack();
                     RefineryUtilities.centerFrameOnScreen(chart);
                     chart.setVisible(true);
-                } else if (selectedIndex == 8 && re==3) {
-                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "链状网络拓扑","重构链状网络拓扑",notificationForm.pw.cruiseTime, notificationForm.pw.reCruiseTime);
+                } else if (selectedIndex == 8 && re == 3) {
+                    XYLineChart_AWT chart = new XYLineChart_AWT("编队状态图", "编队状态图", "巡航时间s", "巡航完成度%", "链状网络拓扑", "重构链状网络拓扑", notificationForm.pw.cruiseTime, notificationForm.pw.reCruiseTime);
                     chart.pack();
                     RefineryUtilities.centerFrameOnScreen(chart);
                     chart.setVisible(true);
@@ -243,7 +243,7 @@ public class ControlPanel {
         tabbedPane2 = new JTabbedPane();
         panel.add(tabbedPane2, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(5, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setLayout(new GridLayoutManager(9, 1, new Insets(0, 0, 0, 0), -1, -1));
         tabbedPane2.addTab("控制面板", panel1);
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(5, 3, new Insets(0, 0, 0, 0), -1, -1));
@@ -300,11 +300,11 @@ public class ControlPanel {
         网络生成时间图Button.setText("生成时间图");
         panel3.add(网络生成时间图Button, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         连通节点图Button = new JButton();
-        连通节点图Button.setText("连通节点图");
+        连通节点图Button.setText("编队状态图");
         panel3.add(连通节点图Button, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new GridLayoutManager(4, 2, new Insets(0, 0, 0, 0), -1, -1));
-        panel1.add(panel4, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel1.add(panel4, new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         显示轨迹CheckBox = new JCheckBox();
         显示轨迹CheckBox.setSelected(true);
         显示轨迹CheckBox.setText("显示轨迹");
@@ -333,11 +333,23 @@ public class ControlPanel {
         radioButton1.setText("其它");
         panel4.add(radioButton1, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel5 = new JPanel();
-        panel5.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel5.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel5, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         暂停Button = new JButton();
         暂停Button.setText("暂停仿真");
-        panel5.add(暂停Button, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        panel5.add(暂停Button, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        编队时间比较Button = new JButton();
+        编队时间比较Button.setText("编队时间比较");
+        panel1.add(编队时间比较Button, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        巡航状态Button = new JButton();
+        巡航状态Button.setText("巡航状态");
+        panel1.add(巡航状态Button, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        重构时间Button = new JButton();
+        重构时间Button.setText("重构时间");
+        panel1.add(重构时间Button, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        巡航状态对比Button = new JButton();
+        巡航状态对比Button.setText("巡航状态对比");
+        panel1.add(巡航状态对比Button, new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         tabbedPane1 = new JTabbedPane();
         panel.add(tabbedPane1, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JPanel panel6 = new JPanel();

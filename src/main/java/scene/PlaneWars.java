@@ -360,7 +360,7 @@ public class PlaneWars extends JPanel {
         meshTime = 0L;
         formationTime = 0L;
         currentTime = 0L;
-        this.randomMeshTime.clear();
+        this.gridMeshTime.clear();
         simulation = new Thread() {
             @Override
             public void run() {
@@ -435,7 +435,7 @@ public class PlaneWars extends JPanel {
     public void formationLine() {
         meshTime = 0L;
         formationTime = 0L;
-        this.randomMeshTime.clear();
+        this.lineMeshTime.clear();
         currentTime = 0L;
         uavNetwork.status = SimulationStatus.FindCluster;
         simulation = new Thread() {
@@ -513,7 +513,7 @@ public class PlaneWars extends JPanel {
         meshTime = 0L;
         formationTime = 0L;
         currentTime = 0L;
-        this.randomMeshTime.clear();
+        this.circleMeshTime.clear();
         uavNetwork.status = SimulationStatus.FindCluster;
         simulation = new Thread() {
             @Override
