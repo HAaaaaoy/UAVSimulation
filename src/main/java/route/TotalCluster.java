@@ -317,11 +317,15 @@ public class TotalCluster {
                     random[7] = new Random().nextInt(2, 7);
                     for (int i = 0; i < clusters.size(); i++) {
                         UAV uav = clusters.get(i).clusterHead;
-                        //或者使用unchecked((int)tick)也可
                         int index = uav.cluster.getMemberList().remove(random[i]);
                         uavNetwork.movingList.remove(uavNetwork.uavHashMap.get(index));
+                        if(i==2 || i==3 || i==5 || i==7){
+                            if(random[i] >= uav.cluster.getMemberList().size()) random[i]--;
+                            int indexs = uav.cluster.getMemberList().remove(random[i]);
+                            uavNetwork.movingList.remove(uavNetwork.uavHashMap.get(indexs));
+                        }
                     }
-                    uavNetwork.clusterCount = 160;
+                    uavNetwork.clusterCount = 300;
                     isSpilt = true;
                 }
             }
