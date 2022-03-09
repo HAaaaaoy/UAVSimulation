@@ -39,8 +39,8 @@ public class WirelessChannel extends Thread {
                     transmissions.remove(t);
                     random = ThreadLocalRandom.current().nextInt(0,100);
                     if(random <=90){
-                        UAVNetwork.getUavHashMap().get(t.getDst()).linkLayer.addReceiveQueue(t.getPacket());
-                        t.getPacket().setReceiveTime(Math.toIntExact(PlaneWars.currentTime));
+//                        .getUavHashMap().get(t.getDst()).linkLayer.addReceiveQueue(t.getPacket());
+//                        t.getPacket().setReceiveTime(Math.toIntExact(PlaneWars.currentTime));
                     }
                 }
             }
@@ -53,11 +53,11 @@ public class WirelessChannel extends Thread {
     }
 
     public Boolean isAchieved(Transmission transmission) {
-        UAV src = UAVNetwork.uavHashMap.get(transmission.getSrc());
-        UAV dst = UAVNetwork.uavHashMap.get(transmission.getDst());
-        if ((PlaneWars.currentTime - transmission.getCreatTime()) >= delay(src.calculateDistance(dst))) {
-            return true;
-        }
+//        UAV src = UAVNetwork.uavHashMap.get(transmission.getSrc());
+//        UAV dst = UAVNetwork.uavHashMap.get(transmission.getDst());
+//        if ((PlaneWars.currentTime - transmission.getCreatTime()) >= delay(src.calculateDistance(dst))) {
+//            return true;
+//        }
         return false;
     }
 

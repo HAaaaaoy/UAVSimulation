@@ -54,7 +54,7 @@ public class NotificationForm {
             public void actionPerformed(ActionEvent e) {
                 current = 1;
                 Rectangle bounds = pw.getBounds();
-                pw.setNetwork(new UAVNetwork(64));
+                pw.setNetwork(new UAVNetwork(64, pw));
                 pw.setSize(bounds.width, bounds.height);
                 pw.topologyStatus = Topology.Random;
                 pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -67,7 +67,7 @@ public class NotificationForm {
             public void actionPerformed(ActionEvent e) {
                 current = 2;
                 Rectangle bounds = pw.getBounds();
-                pw.setNetwork(new UAVNetwork(64));
+                pw.setNetwork(new UAVNetwork(64, pw));
                 pw.setSize(bounds.width, bounds.height);
                 pw.topologyStatus = Topology.Grid;
                 pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -80,7 +80,7 @@ public class NotificationForm {
             public void actionPerformed(ActionEvent e) {
                 current = 3;
                 Rectangle bounds = pw.getBounds();
-                pw.setNetwork(new UAVNetwork(64));
+                pw.setNetwork(new UAVNetwork(64, pw));
                 pw.setSize(bounds.width, bounds.height);
                 pw.topologyStatus = Topology.Circle;
                 pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -93,7 +93,7 @@ public class NotificationForm {
             public void actionPerformed(ActionEvent e) {
                 current = 4;
                 Rectangle bounds = pw.getBounds();
-                pw.setNetwork(new UAVNetwork(64));
+                pw.setNetwork(new UAVNetwork(64, pw));
                 pw.setSize(bounds.width, bounds.height);
                 pw.topologyStatus = Topology.Line;
                 pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -138,7 +138,7 @@ public class NotificationForm {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(64));
+                        pw.setNetwork(new UAVNetwork(64, pw));
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Circle;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -151,7 +151,7 @@ public class NotificationForm {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(64));
+                        pw.setNetwork(new UAVNetwork(64, pw));
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Grid;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -164,7 +164,7 @@ public class NotificationForm {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(64));
+                        pw.setNetwork(new UAVNetwork(64, pw));
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Circle;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -177,7 +177,7 @@ public class NotificationForm {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(64));
+                        pw.setNetwork(new UAVNetwork(64, pw));
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Line;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -190,7 +190,7 @@ public class NotificationForm {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(64));
+                        pw.setNetwork(new UAVNetwork(64, pw));
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Grid;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -203,7 +203,7 @@ public class NotificationForm {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(64));
+                        pw.setNetwork(new UAVNetwork(64, pw));
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Line;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -240,7 +240,7 @@ public class NotificationForm {
                     public void actionPerformed(ActionEvent e) {
                         current = 6;
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(64));
+                        pw.setNetwork(new UAVNetwork(64, pw));
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Grid;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -253,7 +253,7 @@ public class NotificationForm {
                     public void actionPerformed(ActionEvent e) {
                         current = 7;
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(64));
+                        pw.setNetwork(new UAVNetwork(64, pw));
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Circle;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -266,7 +266,7 @@ public class NotificationForm {
                     public void actionPerformed(ActionEvent e) {
                         current = 8;
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(64));
+                        pw.setNetwork(new UAVNetwork(64, pw));
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Line;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -297,8 +297,8 @@ public class NotificationForm {
                     public void actionPerformed(ActionEvent e) {
                         reButton = 1;
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(51));
-                        pw.uavNetwork.setClusterMemberNumber(6);
+                        pw.setNetwork(new UAVNetwork(64, pw));
+                        pw.uavNetwork.setClusterMemberNumber(7);
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Grid;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -311,8 +311,8 @@ public class NotificationForm {
                     public void actionPerformed(ActionEvent e) {
                         reButton = 2;
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(51));
-                        pw.uavNetwork.setClusterMemberNumber(6);
+                        pw.setNetwork(new UAVNetwork(64, pw));
+                        pw.uavNetwork.setClusterMemberNumber(7);
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Circle;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;
@@ -325,8 +325,8 @@ public class NotificationForm {
                     public void actionPerformed(ActionEvent e) {
                         reButton = 3;
                         Rectangle bounds = pw.getBounds();
-                        pw.setNetwork(new UAVNetwork(51));
-                        pw.uavNetwork.setClusterMemberNumber(6);
+                        pw.setNetwork(new UAVNetwork(64, pw));
+                        pw.uavNetwork.setClusterMemberNumber(7);
                         pw.setSize(bounds.width, bounds.height);
                         pw.topologyStatus = Topology.Line;
                         pw.uavNetwork.status = SimulationStatus.FindCluster;

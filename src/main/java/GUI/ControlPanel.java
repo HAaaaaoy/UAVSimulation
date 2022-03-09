@@ -8,9 +8,10 @@ import com.intellij.uiDesigner.core.Spacer;
 import org.jfree.ui.RefineryUtilities;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.HashMap;
 
 public class ControlPanel {
     private JPanel panel;
@@ -18,7 +19,7 @@ public class ControlPanel {
     private JButton 网络生成时间图Button;
     private JButton 连通节点图Button;
     private JCheckBox 显示轨迹CheckBox;
-    private JCheckBox 备份CheckBox;
+    private JCheckBox 巡航是否分簇CheckBox;
     private JRadioButton 编队飞行RadioButton;
     private JRadioButton 智能恢复RadioButton;
     private JSlider 线程速度slider1;
@@ -35,6 +36,8 @@ public class ControlPanel {
     private JButton 巡航状态Button;
     private JButton 重构时间Button;
     private JButton 巡航状态对比Button;
+
+
 
 
     private NotificationForm notificationForm;
@@ -212,6 +215,14 @@ public class ControlPanel {
                 }
             }
         });
+
+        巡航是否分簇CheckBox.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                JCheckBox checkbox = (JCheckBox) e.getSource();
+                notificationForm.pw.isCheck = checkbox.isSelected();
+            }
+        });
     }
 
     private void createUIComponents() {
@@ -309,9 +320,9 @@ public class ControlPanel {
         显示轨迹CheckBox.setSelected(true);
         显示轨迹CheckBox.setText("显示轨迹");
         panel4.add(显示轨迹CheckBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        备份CheckBox = new JCheckBox();
-        备份CheckBox.setText("备份");
-        panel4.add(备份CheckBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        巡航是否分簇CheckBox = new JCheckBox();
+        巡航是否分簇CheckBox.setText("巡航是否分簇");
+        panel4.add(巡航是否分簇CheckBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         编队飞行RadioButton = new JRadioButton();
         编队飞行RadioButton.setEnabled(true);
         编队飞行RadioButton.setSelected(true);

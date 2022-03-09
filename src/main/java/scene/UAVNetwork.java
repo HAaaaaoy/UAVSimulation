@@ -21,7 +21,7 @@ public class UAVNetwork {
 
     private int uavNumber;
     //保存网络所有无人机的map表
-    public static HashMap<Integer, UAV> uavHashMap = new HashMap<>();
+    public HashMap<Integer, UAV> uavHashMap = new HashMap<>();
     public CopyOnWriteArrayList<UAV> notClusterList = new CopyOnWriteArrayList<>();
     public CopyOnWriteArrayList<UAV> movingList = new CopyOnWriteArrayList<>();
     //仿真时无人机的标注信息
@@ -66,15 +66,17 @@ public class UAVNetwork {
 
     public int clusterMemberNumber = 0;
 
+    public int clusterCount = 0;
+
 
 
 
     public TotalCluster totalCluster;
 
-    public UAVNetwork(int uavNumber) {
+    public UAVNetwork(int uavNumber, PlaneWars pw) {
         this.uavNumber = uavNumber;
         this.route = new Route();
-        this.totalCluster = new TotalCluster(this);
+        this.totalCluster = new TotalCluster(this,pw);
     }
 
 
@@ -187,7 +189,7 @@ public class UAVNetwork {
         return texts;
     }
 
-    public static HashMap<Integer, UAV> getUavHashMap() {
+    public HashMap<Integer, UAV> getUavHashMap() {
         return uavHashMap;
     }
 

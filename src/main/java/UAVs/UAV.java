@@ -179,7 +179,7 @@ public class UAV extends Thread {
                 moveRandomly();
                 if (uavNetwork.gridCount >= 300) {
                     for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
-                        UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
                         member.memberMoveGridly();
                     }
                 }
@@ -187,19 +187,31 @@ public class UAV extends Thread {
                 position_index_x = position_index_x + (targetX - position_index_x) / moveSpeed;
                 position_index_y = position_index_y + (targetY - position_index_y) / moveSpeed;
                 for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
-                    UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                    UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
                     member.memberMoveGridly();
                 }
             } else if (uavNetwork.status == SimulationStatus.Cruise) {
-                position_index_x = targetX;
-                position_index_y = targetY;
-                for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
-                    UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
-                    member.memberMoveGridly();
+
+                if(uavNetwork.clusterCount==0){
+                    position_index_x = targetX;
+                    position_index_y = targetY;
+                    for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                        UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        member.memberMoveGridly();
+                    }
+                }else if(uavNetwork.clusterCount>0){
+                    position_index_x = targetX;
+                    position_index_y = targetY;
+                    for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                        UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        member.moveGridly();
+                    }
+                    if(uavNetwork.clusterCount>0) uavNetwork.clusterCount--;
                 }
+
             }
         } else {
-            if (uavNetwork.gridCount <= 300) {
+            if (uavNetwork.gridCount <= 300 || uavNetwork.clusterCount>0 ) {
                 int position = clusters.get(0).getMemberList().indexOf((Integer) this.serialID);
                 UAV head = clusters.get(0).clusterHead;
                 switch (position) {
@@ -326,7 +338,7 @@ public class UAV extends Thread {
                 moveRandomly();
                 if (uavNetwork.lineCount >= 300) {
                     for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
-                        UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
                         member.memberMoveLinely();
                     }
                 }
@@ -334,19 +346,29 @@ public class UAV extends Thread {
                 position_index_x = position_index_x + (targetX - position_index_x) / moveSpeed;
                 position_index_y = position_index_y + (targetY - position_index_y) / moveSpeed;
                 for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
-                    UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                    UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
                     member.memberMoveLinely();
                 }
             } else if (uavNetwork.status == SimulationStatus.Cruise) {
-                position_index_x = targetX;
-                position_index_y = targetY;
-                for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
-                    UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
-                    member.memberMoveLinely();
+                if(uavNetwork.clusterCount==0){
+                    position_index_x = targetX;
+                    position_index_y = targetY;
+                    for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                        UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        member.memberMoveLinely();
+                    }
+                }else if(uavNetwork.clusterCount>0){
+                    position_index_x = targetX;
+                    position_index_y = targetY;
+                    for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                        UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        member.moveLinely();
+                    }
+                    if(uavNetwork.clusterCount>0) uavNetwork.clusterCount--;
                 }
             }
         } else {
-            if (uavNetwork.lineCount <= 300) {
+            if (uavNetwork.lineCount <= 300 || uavNetwork.clusterCount>0) {
                 int position = clusters.get(0).getMemberList().indexOf((Integer) this.serialID);
                 UAV head = clusters.get(0).clusterHead;
                 if (calculateDistance(head.position_index_x + (position + 1) * lineDistance, head.position_index_y) <= lineDistance) {
@@ -374,7 +396,7 @@ public class UAV extends Thread {
                 moveRandomly();
                 if (uavNetwork.circleCount >= 300) {
                     for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
-                        UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
                         member.memberMoveCircly();
                     }
                 }
@@ -382,19 +404,29 @@ public class UAV extends Thread {
                 position_index_x = position_index_x + (targetX - position_index_x) / moveSpeed;
                 position_index_y = position_index_y + (targetY - position_index_y) / moveSpeed;
                 for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
-                    UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                    UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
                     member.memberMoveCircly();
                 }
             } else if (uavNetwork.status == SimulationStatus.Cruise) {
-                position_index_x = targetX;
-                position_index_y = targetY;
-                for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
-                    UAV member = UAVNetwork.uavHashMap.get(cluster.getMemberList().get(i));
-                    member.memberMoveCircly();
+                if(uavNetwork.clusterCount==0){
+                    position_index_x = targetX;
+                    position_index_y = targetY;
+                    for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                        UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        member.memberMoveCircly();
+                    }
+                }else if(uavNetwork.clusterCount>0){
+                    position_index_x = targetX;
+                    position_index_y = targetY;
+                    for (int i = 0; i < this.cluster.getMemberList().size(); i++) {
+                        UAV member = uavNetwork.uavHashMap.get(cluster.getMemberList().get(i));
+                        member.moveCircly();
+                    }
+                    if(uavNetwork.clusterCount>0) uavNetwork.clusterCount--;
                 }
             }
         } else {
-            if (uavNetwork.circleCount <= 300) {
+            if (uavNetwork.circleCount <= 300 || uavNetwork.clusterCount>0) {
                 int position = clusters.get(0).getMemberList().indexOf((Integer) this.serialID);
                 UAV head = clusters.get(0).clusterHead;
                 switch (position) {
@@ -841,7 +873,7 @@ public class UAV extends Thread {
                     if (titem.equalsNextRoute(sitem)) {
                         //有相同下一跳路由器
                         //替换原有Item
-                        if (communication.contains(UAVNetwork.uavHashMap.get(titem.getNext()))) {
+                        if (communication.contains(uavNetwork.uavHashMap.get(titem.getNext()))) {
 
                             //直连路由器不更新
                         } else {

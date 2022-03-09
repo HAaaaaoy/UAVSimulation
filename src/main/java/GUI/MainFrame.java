@@ -38,7 +38,7 @@ public class MainFrame extends JFrame {
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         //窗体可拉伸
-        this.setTitle("羊群系统自组网仿真系统");
+        this.setTitle("无人机蜂群系统");
         this.setResizable(true);
         this.setVisible(true);
     }

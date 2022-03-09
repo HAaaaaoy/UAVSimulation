@@ -48,7 +48,7 @@ public class TopoForm {
             public void actionPerformed(ActionEvent e) {
                 Rectangle bounds = pw.getBounds();
                 pw.setSize(bounds.width, bounds.height);
-                pw.setNetwork(new UAVNetwork(64));
+                pw.setNetwork(new UAVNetwork(64, pw));
                 pw.topologyStatus = Topology.Grid;
                 pw.uavNetwork.status = SimulationStatus.FindCluster;
                 pw.initThread();
@@ -60,7 +60,7 @@ public class TopoForm {
             public void actionPerformed(ActionEvent e) {
                 Rectangle bounds = pw.getBounds();
                 pw.setSize(bounds.width, bounds.height);
-                pw.setNetwork(new UAVNetwork(64));
+                pw.setNetwork(new UAVNetwork(64, pw));
                 pw.topologyStatus = Topology.Line;
                 pw.uavNetwork.status = SimulationStatus.FindCluster;
                 pw.initThread();

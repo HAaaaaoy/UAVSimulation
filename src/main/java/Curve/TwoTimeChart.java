@@ -22,8 +22,8 @@ public class TwoTimeChart extends JFrame {
         super(applicationTitle);
         JFreeChart xylineChart = ChartFactory.createXYLineChart(
                 "网络生成图",
-                "组网时间",
-                "最大连通集%",
+                "组网时间/ms",
+                "最大连通集(百分比）%",
                 createDataset1(xian, data),
                 PlotOrientation.VERTICAL,
                 true, true, false);
@@ -40,8 +40,8 @@ public class TwoTimeChart extends JFrame {
 
         JFreeChart xylineChart2 = ChartFactory.createXYLineChart(
                 chartTitle,
-                "连通节点数",
-                "组网时间",
+                "连通节点数/个",
+                "组网时间/ms",
                 createDataset2(xian, data),
                 PlotOrientation.VERTICAL,
                 true, true, false);

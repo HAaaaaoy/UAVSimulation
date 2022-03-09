@@ -205,12 +205,12 @@
                       <text value="显示轨迹"/>
                     </properties>
                   </component>
-                  <component id="327fc" class="javax.swing.JCheckBox" binding="备份CheckBox" default-binding="true">
+                  <component id="327fc" class="javax.swing.JCheckBox" binding="巡航是否分簇CheckBox" default-binding="true">
                     <constraints>
                       <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
-                      <text value="备份"/>
+                      <text value="巡航是否分簇"/>
                     </properties>
                   </component>
                   <component id="ad354" class="javax.swing.JRadioButton" binding="编队飞行RadioButton" default-binding="true">

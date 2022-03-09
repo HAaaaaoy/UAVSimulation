@@ -13,6 +13,7 @@ public class ImageRead {
     public static BufferedImage map;
     public static BufferedImage cloudOriginal;
     public static BufferedImage cloudBlue;
+    public static BufferedImage cloudCopy;
     static {
         try {
             NRUAVs = ImageIO.read(new FileInputStream("./image/NRUAVs.png"));
@@ -21,6 +22,7 @@ public class ImageRead {
             map = ImageIO.read(new FileInputStream("./image/map.jpeg"));
             cloudOriginal = ImageIO.read(new FileInputStream("./image/cloud.png"));
             cloudBlue = ImageIO.read(new FileInputStream("./image/cloud_blue.png"));
+            cloudCopy = ImageIO.read(new FileInputStream("./image/cloud_copy.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
