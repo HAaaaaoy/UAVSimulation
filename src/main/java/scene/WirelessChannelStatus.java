@@ -1,5 +1,5 @@
 package scene;
 
 public enum  WirelessChannelStatus {
-    Collision, Busy, Idle
+    Collision, Busy, Idle, hello
 }
