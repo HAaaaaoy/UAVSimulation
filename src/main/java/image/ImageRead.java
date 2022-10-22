@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 public class ImageRead {
-
     public static BufferedImage NRUAVs;
     public static BufferedImage RUAVs;
     public static BufferedImage GateWays;

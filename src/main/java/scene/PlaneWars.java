@@ -55,6 +55,19 @@ public class PlaneWars extends JPanel {
     public CopyOnWriteArrayList<Long> reTime = new CopyOnWriteArrayList<>();
     public CopyOnWriteArrayList<Long> reCruiseTime = new CopyOnWriteArrayList<>();
 
+    //新封装的方法
+    public static final int NUMBER_OF_NODES = 7;
+    public static final int NUMBER_OF_TRANSMISSIONS = 100;
+    public static final int NUMBER_OF_TIME_SLOTS = 100000;
+    public static final boolean backOffRepair = false;
+    public static final int NUM_BAD_FISH = 1;
+    public static final double BAD_FISH_SPEED = 5.5;
+    public static final double STANDARD_SPEED = 11;
+
+    public static final int PACKET_SIZE = 2048;
+    public static final int STANDARD_BIT_RATE = 11000000;
+
+
     public PlaneWars() {
         this.uavNetwork = new UAVNetwork(64,this);
     }
@@ -88,6 +101,7 @@ public class PlaneWars extends JPanel {
         simulation.interrupt();
     }
 
+    //根据界面的设置，初始化无人机为某一种编队类型
     public void initThread() {
         if (topologyStatus.equals(Topology.Random) && uavNetwork.status.equals(SimulationStatus.FindCluster)) {
             randomMesh();
@@ -719,8 +733,6 @@ public class PlaneWars extends JPanel {
             CloudDraw cloudDraw = iterator.next();
             g.drawImage(cloudDraw.image, cloudDraw.x, cloudDraw.y, areaWidth, areaHeight, this);
         }
-
-
     }
 
     private void setRunningFlag(Boolean flag) {

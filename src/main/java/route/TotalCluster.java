@@ -36,6 +36,9 @@ public class TotalCluster {
         secondClusters = new CopyOnWriteArrayList<>();
     }
 
+
+
+    //初始化
     public void initStartPosition(Topology topology) {
         if (topology == Topology.Grid || topology == Topology.Circle) {
             this.topology = topology;
@@ -307,14 +310,14 @@ public class TotalCluster {
                 //弹性损失节点
                 if (!isSpilt) {
                     int[] random = new int[8];
-                    random[0] = new Random().nextInt(2, 7);
-                    random[1] = new Random().nextInt(2, 7);
-                    random[2] = new Random().nextInt(2, 7);
-                    random[3] = new Random().nextInt(2, 7);
-                    random[4] = new Random().nextInt(2, 7);
-                    random[5] = new Random().nextInt(2, 7);
-                    random[6] = new Random().nextInt(2, 7);
-                    random[7] = new Random().nextInt(2, 7);
+//                    random[0] = new Random().nextInt(2, 7);
+//                    random[1] = new Random().nextInt(2, 7);
+//                    random[2] = new Random().nextInt(2, 7);
+//                    random[3] = new Random().nextInt(2, 7);
+//                    random[4] = new Random().nextInt(2, 7);
+//                    random[5] = new Random().nextInt(2, 7);
+//                    random[6] = new Random().nextInt(2, 7);
+//                    random[7] = new Random().nextInt(2, 7);
                     for (int i = 0; i < clusters.size(); i++) {
                         UAV uav = clusters.get(i).clusterHead;
                         int index = uav.cluster.getMemberList().remove(random[i]);

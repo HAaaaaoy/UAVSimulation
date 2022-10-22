@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -28,6 +29,9 @@ import scene.WirelessChannel;
 import text.TextStatus;
 import text.UAVsText;
 
+/**
+ * 无人机仿真的实体实现类
+ * */
 
 public class UAV extends Thread {
 
@@ -92,6 +96,33 @@ public class UAV extends Thread {
     public int clusterNumber;
 
 
+    //新加入封装方法
+    private int backoff;
+    private int sendAttempts;
+    private int contWindow;
+
+    public static final int CMIN = 31;
+    public static final int CMAX = 1023;
+
+    private int packetsToSend;
+    private int packetSize;
+    //控制包
+    private boolean controlPacket;
+    //表明它是一个数据包
+    private boolean data;
+    //无人机传输速度比特流
+    private double bitsPerSec;
+    //Time required to send one packet for
+    //请求发送一个包的时间请求
+    private double timePerPacket;
+    //争用窗口，以节点数量创建窗口数量，目前是64无人机节点
+    public static int[] contWindowIndicator = new int[64];
+
+
+
+
+
+
 
 
     public UAV(int position_index_x, int position_index_y, int UAV_Height, int UAV_Width, BufferedImage UAV_image, int serialID, UAVNetwork uavNetwork) {
@@ -106,8 +137,18 @@ public class UAV extends Thread {
         this.wifi = this.uavNetwork.wifi;
         this.linkLayer = new LinkLayer(this.wifi, this);
         this.uaVsText = new UAVsText(position_index_x, position_index_y, UAV_Height, serialID, this);
+        //新加入封装方法
+        backoff = 0;
+        sendAttempts = 0;
+        contWindow = CMIN;
+        packetsToSend = 0;
+        bitsPerSec = 0.0;
+        controlPacket = false;
+        data = false;
     }
 
+
+    //仿真运行的run（）方法重写
     public void run() {
         while (true) {
             RouteAndForward();
@@ -126,6 +167,8 @@ public class UAV extends Thread {
         }
     }
 
+
+    //移动方式的实现
     public void move(Topology topologyStatus) {
         if (topologyStatus == Topology.Random) {
             moveRandomly();
@@ -908,6 +951,7 @@ public class UAV extends Thread {
         }
     }
 
+    //实现报文的路由和转发
     public void RouteAndForward() {
         if (!this.linkLayer.receiveQueue.isEmpty()) {
             Packet packet = linkLayer.receiveQueue.remove();
@@ -955,6 +999,7 @@ public class UAV extends Thread {
     }
 
 
+    //生成报文的实现
     public void generatePacket(int dst) {
         Packet packet = new Packet(this.serialID, dst, Math.toIntExact(PlaneWars.currentTime));
         logger.info("At " + PlaneWars.currentTime + "-" + this.serialID + ": 生成报文--目的地址 " + dst + " 报文ID" + packet.packetID);
@@ -974,6 +1019,154 @@ public class UAV extends Thread {
         clusters.clear();
         cluster = null;
         clusterStatus = null;
+
+    }
+
+
+    //新封装的方法
+    public int getBackoff() {
+        return backoff;
+    }
+
+    public void setBackoff(int backoff) {
+        this.backoff = backoff;
+    }
+
+    public int getSendAttempts() {
+        return sendAttempts;
+    }
+
+    public void setSendAttempts(int sendAttempts) {
+        this.sendAttempts = sendAttempts;
+    }
+
+    public int getContWindow() {
+        return contWindow;
+    }
+
+    public void setContWindow(int contWindow) {
+        this.contWindow = contWindow;
+    }
+
+    public int getPacketsToSend() {
+        return packetsToSend;
+    }
+
+    public void setPacketsToSend(int packetsToSend) {
+        this.packetsToSend = packetsToSend;
+    }
+
+    public int getPacketSize() {
+        return packetSize;
+    }
+
+    public void setPacketSize(int packetSize) {
+        this.packetSize = packetSize;
+    }
+
+    public boolean isControlPacket() {
+        return controlPacket;
+    }
+
+    public void setControlPacket(boolean controlPacket) {
+        this.controlPacket = controlPacket;
+    }
+
+    public boolean isData() {
+        return data;
+    }
+
+    public void setData(boolean data) {
+        this.data = data;
+    }
+
+    public double getBitsPerSec() {
+        return bitsPerSec;
+    }
+
+    public void setBitsPerSec(double bitsPerSec) {
+        this.bitsPerSec = bitsPerSec * 1000000;
+        //目前设置的包大小为512kb
+        setTimePerPacket(PlaneWars.PACKET_SIZE / this.bitsPerSec);
+    }
+
+    public double getTimePerPacket() {
+        return timePerPacket;
+    }
+
+    public void setTimePerPacket(double timePerPacket) {
+        this.timePerPacket = timePerPacket;
+    }
+
+    public static int[] getContWindowIndicator() {
+        return contWindowIndicator;
+    }
+
+    public static void setContWindowIndicator(int[] contWindowIndicator) {
+        UAV.contWindowIndicator = contWindowIndicator;
+    }
+
+    public int performBackoff(boolean backOffRepair)
+    {
+
+        System.out.println("Window " + contWindow + "NodeName " + this.serialID);
+
+
+        contWindowIndicator[(this.serialID)]++;
+        sendAttempts = contWindowIndicator[this.serialID];
+
+        // CALCULATION FOR Backoff/contention window
+
+        contWindow = (int)Math.pow(2,sendAttempts) - 1;		// 2^n - 1
+
+        if(backOffRepair){
+
+            contWindow = (int)(contWindow * PlaneWars.STANDARD_SPEED / (bitsPerSec/1000000));
+
+        }
+
+        Random rand = new Random();
+        int k;
+        if(contWindow < CMAX){
+            k = rand.nextInt(contWindow);
+        }
+        else{
+            k = rand.nextInt(CMAX);
+        }
+
+        System.out.println("BackOff value = " + k);
+        backoff = k;
+
+        return backoff;
+
+    }
+    //计算时隙
+    public double calculateTimeSlots(int randNumOfPackets){
+
+        double numOfTimeSlotsRequired = 0;
+
+        numOfTimeSlotsRequired = randNumOfPackets * PlaneWars.STANDARD_BIT_RATE / bitsPerSec;
+
+        return numOfTimeSlotsRequired;
+    }
+    //计算在时隙中的比特
+    public double calculateBitsInSlot(){
+
+        double bitsInSlot = 0;
+
+        bitsInSlot = PlaneWars.PACKET_SIZE * bitsPerSec / PlaneWars.STANDARD_BIT_RATE;
+
+        return bitsInSlot;
+
+    }
+    //重置无人机节点
+    public void reset(String name){
+
+        this.backoff = 0;
+        this.sendAttempts = 0;
+        this.contWindow = CMIN;
+        this.packetsToSend = 0;
+        //Node.contWindowIndicator[Integer.parseInt(nodeName)] = 0;
 
     }
 

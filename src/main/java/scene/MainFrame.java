@@ -24,7 +24,7 @@ public class MainFrame extends JFrame {
     public static void main(String[] args) throws IOException {
         MainFrame mf = new MainFrame();
         mf.start();
-        mf.setTitle("无线局域网");
+        mf.setTitle("无人机蜂群仿真系统V1.0");
         Rectangle bounds = GUItil.getBounds();
         mf.setBounds(bounds);
         mf.setExtendedState(JFrame.MAXIMIZED_BOTH);

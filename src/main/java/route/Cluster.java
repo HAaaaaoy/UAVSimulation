@@ -32,7 +32,6 @@ public class Cluster {
         memberList = new CopyOnWriteArrayList<>();
         gatewayList = new CopyOnWriteArrayList<>();
         //clusterHead.ip = new NodeIP("192.168."+clusterID+"."+clusterHead.getSerialID());
-
     }
 
     public CopyOnWriteArrayList<Integer> getMemberList() {
@@ -47,6 +46,8 @@ public class Cluster {
         this.memberNumber = number;
     }
 
+
+    //添加簇成员到子簇中
     public Boolean addClusterMember(UAV member) {
         if (member.clusters.size() == 1 && this.gateWayNumber == 0 && member.cluster == null) {
             logger.info("At " + PlaneWars.currentTime + ": 第" + member.getSerialID() + "号无人机加入" + this.getClusterID() + "簇");
@@ -67,6 +68,7 @@ public class Cluster {
                     member.communication.add(uav);
                 }
             }
+            // 如果一个簇成员能够与多个簇的簇头进行通信，则将该成员设置为网关
             member.setGateWay();
             firstCluster.gatewayList.add(member);
             this.gatewayList.add(member);
@@ -74,6 +76,7 @@ public class Cluster {
             Route.routes.add(member);
             clusterHead.communication.add(member);
             firstCluster.clusterHead.communication.add(member);
+            //与其他簇建立起通信
             member.communication.add(this.clusterHead);
             member.communication.add(firstCluster.clusterHead);
 //            member.routeTable.add(new RouteTableItem(this.clusterHead.getSerialID(), this.clusterHead.getSerialID(), clusterHead.calculateDistance(member)));

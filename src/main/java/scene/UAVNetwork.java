@@ -80,6 +80,7 @@ public class UAVNetwork {
     }
 
 
+    //初始无人机
     public void initUAVs() {
         for (int i = 0; i < uavNumber; i++) {
             //在开始划分的时候随机平均
@@ -151,6 +152,8 @@ public class UAVNetwork {
 
     }
 
+
+    //通信仿真
     public void communicationSim() {
         Iterator<UAV> uavIterator = movingList.iterator();
         while (uavIterator.hasNext()) {

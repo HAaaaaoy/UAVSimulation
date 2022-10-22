@@ -10,6 +10,23 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class WirelessChannel extends Thread {
 
+    //信道占用状态
+    //表明传输数据
+    private boolean data;
+    //表明传输控制包
+    private boolean control;
+    //表明碰撞冲突
+    private boolean collision;
+    //表明空闲
+    private boolean idle;
+    //在这个时隙传输的比特数量
+    private double bitsInSlot;
+    //Slot speed
+    private double slotSpeed;
+    //wifi无线信道的状态
+    public WirelessChannelStatus wifistatus;
+
+
     private int random ;
     /**
      * 无线信道
@@ -28,6 +45,8 @@ public class WirelessChannel extends Thread {
 
     }
 
+
+    // 无线信道的实现
     public void run() {
         Transmission t;
         while (true) {
@@ -61,9 +80,55 @@ public class WirelessChannel extends Thread {
         return false;
     }
 
-    private int delay(int distance) {
+    public int delay(int distance) {
         return (int) Math.floor(0.5 * distance);
     }
 
+    public boolean isData() {
+        return data;
+    }
 
+    public void setData(boolean data) {
+        this.data = data;
+    }
+
+    public boolean isControl() {
+        return control;
+    }
+
+    public void setControl(boolean control) {
+        this.control = control;
+    }
+
+    public boolean isCollision() {
+        return collision;
+    }
+
+    public void setCollision(boolean collision) {
+        this.collision = collision;
+    }
+
+    public boolean isIdle() {
+        return idle;
+    }
+
+    public void setIdle(boolean idle) {
+        this.idle = idle;
+    }
+
+    public double getBitsInSlot() {
+        return bitsInSlot;
+    }
+
+    public void setBitsInSlot(double bitsInSlot) {
+        this.bitsInSlot = bitsInSlot;
+    }
+
+    public double getSlotSpeed() {
+        return slotSpeed;
+    }
+
+    public void setSlotSpeed(double slotSpeed) {
+        this.slotSpeed = slotSpeed;
+    }
 }

@@ -15,7 +15,6 @@ public class Route {
 
     public Route(){
         clusters = new CopyOnWriteArrayList<>();
-
     }
 
 //    public synchronized static Route getInstance(){
